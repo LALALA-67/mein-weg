@@ -458,3 +458,21 @@ body{background:var(--bg)}
 .catdel{position:absolute;top:-6px;right:-6px;width:20px!important;height:20px;min-height:20px!important;padding:0!important;border-radius:50%!important;background:var(--card)!important;border:1px solid var(--line)!important;font-size:13px!important;line-height:1}
 .anim.photo{background:#fff}
 .anim.photo img+img{animation:swap 2.4s ease-in-out infinite}
+/* Journal */
+.jpaper{background:linear-gradient(180deg,rgba(236,226,206,.06),rgba(0,0,0,0)),var(--card)}
+.moods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.mood{display:grid;justify-items:center;gap:4px;padding:8px 2px;background:var(--card2);border:1.5px solid transparent;font-size:12px;font-weight:600;color:var(--mute)}
+.mood[aria-pressed=true]{border-color:var(--acc);color:var(--ink);background:var(--soft)}
+.jprompt{font-style:italic;color:var(--mute);margin-bottom:8px;font-size:17px}
+.jtext{min-height:240px;font-size:18px;line-height:1.7;background:repeating-linear-gradient(to bottom,transparent 0,transparent 29.6px,var(--line) 29.6px,var(--line) 30.6px);background-attachment:local;padding-top:6px;margin-bottom:6px}
+.jcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px;text-align:center}
+.jcal .h{font-size:12px;color:var(--mute);font-weight:700}
+.jcal button{aspect-ratio:1;min-height:0;padding:0;background:var(--card2);border-radius:50%;display:grid;place-items:center;position:relative;font-size:13px}
+.jcal button b{font-weight:600}
+.jcal button.sel{outline:2px solid var(--acc)}
+.jcal button.today b{color:var(--acc)}
+.jcal button i{position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--acc)}
+.jcal button:disabled{opacity:.35}
+.jlock{max-width:420px;margin:30px auto;display:grid;gap:12px}
+.restcard{position:sticky;top:64px;z-index:6;border-color:rgba(176,30,53,.5)}
+@media(max-width:480px){nav .ni{width:42px}nav button{font-size:10.5px}}

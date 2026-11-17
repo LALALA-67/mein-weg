@@ -20,3 +20,10 @@ create index if not exists rem_due on public.reminders (sent, at);
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
 select cron.schedule('send-reminders', '* * * * *', $$select net.http_post(url := 'https://bucszzzfzjgpdizgxssn.supabase.co/functions/v1/send-reminders', headers := '{"Content-Type":"application/json","Authorization":"Bearer <ANON_KEY>"}'::jsonb, body := '{}'::jsonb)$$);
+
+-- Tägliche Server-Sicherung (14 Tage)
+create table if not exists public.kv_backup (day date not null, user_id uuid not null references auth.users on delete cascade, key text not null, data jsonb not null, updated_at timestamptz, primary key (day, user_id, key));
+alter table public.kv_backup enable row level security;
+create policy own_backup on public.kv_backup for select to authenticated using (auth.uid() = user_id);
+grant select on public.kv_backup to authenticated;
+select cron.schedule('daily-backup', '17 2 * * *', $$insert into public.kv_backup select current_date, user_id, key, data, updated_at from public.kv on conflict do nothing; delete from public.kv_backup where day < current_date - 14$$);
