@@ -57,22 +57,17 @@ Forms.todo = (v, f) => { if (!v.t) return; Day.update(d => d.todos.push({ t: v.t
 Forms.routine = v => { if (!v.t) return; Settings.update(s => { if (!s.routine.includes(v.t)) s.routine.push(v.t); }); const i = $('#rtin'); if (i) { i.value = ''; i.focus(); } };
 
 /* ===== Einstellungen ===== */
-let syncErr = '';
 Views.einstellungen = {
   render() {
     const s = Settings.get(), c = Sync.cfg(), [dc, dl] = Sync.label();
-    let sync;
-    if (!c.url || !c.key) sync = `<p class="small" style="margin-bottom:10px">Damit Handy und Laptop dieselben Daten haben, verbinde die App mit deinem kostenlosen Supabase-Projekt. Trag die beiden Werte aus Supabase (Project Settings → API) ein.</p>
-      <form data-f="syncCfg" class="stack"><label>Project URL<input name="url" placeholder="https://xxxx.supabase.co" autocomplete="off"></label><label>anon public Key<input name="key" placeholder="eyJhbGciOi…" autocomplete="off"></label><button class="pri">Verbinden</button></form>`;
-    else if (!Sync.user) sync = `<p class="small" style="margin-bottom:10px">Melde dich an – auf jedem Gerät mit derselben E-Mail.</p>
-      <form data-f="syncLogin" class="stack"><label>E-Mail<input name="email" type="email" autocomplete="email" required></label><label>Passwort<input name="pw" type="password" autocomplete="current-password" minlength="6" required></label>
-      <div class="row"><button class="pri grow" name="mode" value="in">Anmelden</button><button class="grow" type="button" data-a="syncSignup">Konto erstellen</button></div></form>
-      ${syncErr ? `<p class="small" style="color:#d64545;margin-top:8px">${esc(syncErr)}</p>` : ''}
-      <button class="ghost" style="margin-top:6px" data-a="syncReset">Supabase-Verbindung ändern</button>`;
-    else sync = `<p style="margin-bottom:10px">Angemeldet als <b>${esc(Sync.user.email)}</b></p>${Sync.state === 'err' ? `<p class="small" style="color:#d64545;margin-bottom:8px">${esc(Sync.msg)}</p>` : ''}
-      <div class="row"><button class="grow" data-a="syncNow">${ic('sync')} Jetzt synchronisieren</button><button class="grow" data-a="syncOut">Abmelden</button></div>`;
+    const sync = Sync.user ? `<p style="margin-bottom:10px">Angemeldet als <b>${esc(Sync.user.email)}</b></p>${Sync.state === 'err' ? `<p class="small" style="color:#d64545;margin-bottom:8px">${esc(Sync.msg)}</p>` : ''}
+      <div class="row"><button class="grow" data-a="syncNow">${ic('sync')} Jetzt synchronisieren</button><button class="grow" data-a="syncOut">Abmelden</button></div>`
+      : `<p class="small">Der Server für Konten ist noch nicht eingerichtet – deine Daten bleiben vorerst auf diesem Gerät.</p>`;
     return `<div class="top"><h1>Einstellungen</h1></div><div class="cards">
-      <div class="col"><section class="card"><h2>Design</h2><div class="seg" style="width:100%">${[['auto', 'Automatisch'], ['light', 'Hell'], ['dark', 'Dunkel']].map(([k, l]) => `<button class="grow" data-a="theme" data-v="${k}" aria-pressed="${s.theme === k}">${l}</button>`).join('')}</div></section>
+      <div class="col"><section class="card"><h2>Design</h2><div class="seg" style="width:100%">${[['dark', 'Nacht'], ['light', 'Nebel'], ['auto', 'Automatisch']].map(([k, l]) => `<button class="grow" data-a="theme" data-v="${k}" aria-pressed="${s.theme === k}">${l}</button>`).join('')}</div>
+        <div class="row between" style="margin-top:14px"><span><b>Regen & Gewitter</b><br><span class="small">Animierter Regen und ab und zu ein Blitz</span></span><button class="chk" style="width:52px;border-radius:99px" data-a="rainToggle" aria-pressed="${FX.on}" aria-label="Regen an/aus">${FX.on ? ic('check') : ''}</button></div></section>
+      <section class="card"><h2>Dein Körper</h2><p class="small" style="margin-bottom:10px">Für die Körperkarte nach dem Training und im Monatsrückblick.</p>${Body.sexSwitch()}</section>
+      <section class="card"><h2>App installieren</h2>${installBox()}</section>
       <section class="card"><h2>Deine Tagesziele</h2><form data-f="goals" class="stack"><div class="formgrid">
         <label>Kalorien<input name="kcal" type="number" inputmode="numeric" min="800" max="6000" value="${s.goals.kcal}"></label>
         <label>Protein (g)<input name="p" type="number" inputmode="numeric" min="0" value="${s.goals.p}"></label>
@@ -81,47 +76,93 @@ Views.einstellungen = {
         <label>Wasser (Gläser à 250 ml)<input name="water" type="number" inputmode="numeric" min="1" max="20" value="${s.water}"></label></div>
         <p class="small">Deine Makros ergeben ${num(s.goals.p * 4 + s.goals.c * 4 + s.goals.f * 9)} kcal (Protein & Kohlenhydrate 4 kcal/g, Fett 9 kcal/g).</p>
         <button class="pri">Ziele speichern</button></form></section></div>
-      <div class="col"><section class="card"><div class="row between"><h2 style="margin:0">Sync Handy ↔ Laptop</h2><span class="status"><span class="dot ${dc}"></span>${dl}</span></div><div style="margin-top:12px">${sync}</div></section>
+      <div class="col"><section class="card"><div class="row between"><h2 style="margin:0">Konto & Sync</h2><span class="status"><span class="dot ${dc}"></span>${dl}</span></div><div style="margin-top:12px">${sync}</div></section>
       <section class="card"><h2>Backup</h2><p class="small" style="margin-bottom:10px">Sichere alle Daten als Datei oder spiele ein Backup wieder ein.</p>
         <div class="row"><button class="grow" data-a="exportData">Backup herunterladen</button><label class="grow" style="display:block"><span class="sr" style="display:none">Backup laden</span><input type="file" accept="application/json,.json" data-c="importData" hidden><span style="display:flex;justify-content:center;align-items:center;min-height:44px;border-radius:14px;background:var(--card2);color:var(--ink);font-weight:800;cursor:pointer">Backup laden</span></label></div></section>
       <section class="card"><h2>Über die App</h2><p class="small">Produktdaten: Open Food Facts (ODbL). Übungen & Bilder: Free Exercise DB (Public Domain). Gesichts-Animationen: selbst gezeichnet.</p></section></div></div>`;
   }
 };
 Actions.theme = el => Settings.update(s => s.theme = el.dataset.v);
+Actions.rainToggle = () => Settings.update(s => s.rain = !FX.on);
+let installEvt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (App.tab === 'einstellungen') App.render(); });
+addEventListener('appinstalled', () => { installEvt = null; App.toast('App installiert!'); });
+function installBox() {
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (standalone) return '<p class="small">Du benutzt gerade die installierte App. ✓</p>';
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (installEvt) return '<p class="small" style="margin-bottom:10px">Installiere The Lore als eigene App – mit Symbol, eigenem Fenster und ohne Browser-Leiste.</p><button class="pri" style="width:100%" data-a="install">App installieren</button>';
+  if (ios) return '<p class="small">iPhone: Öffne diese Seite in <b>Safari</b>, tippe unten auf <b>Teilen</b> (Quadrat mit Pfeil) und dann auf <b>„Zum Home-Bildschirm“</b>.</p>';
+  return '<p class="small">Laptop (Chrome/Edge): Klick rechts in der Adressleiste auf das Symbol <b>„App installieren“</b> (Bildschirm mit Pfeil) oder im Menü ⋮ auf <b>„The Lore installieren“</b>.<br>Android (Chrome): Menü ⋮ → <b>„App installieren“</b>.</p>';
+}
+Actions.install = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; App.render(); };
 Forms.goals = v => { Settings.update(s => { s.goals = { kcal: +v.kcal || 2000, p: +v.p || 0, c: +v.c || 0, f: +v.f || 0 }; s.water = Math.max(1, +v.water || 8); }); App.toast('Ziele gespeichert'); };
-Forms.syncCfg = async v => {
-  if (!/^https:\/\/.+/.test(v.url) || v.key.length < 20) { App.toast('Bitte URL und Key genau aus Supabase kopieren.'); return; }
-  localStorage.setItem('mw-cfg-url', v.url.replace(/\/$/, '')); localStorage.setItem('mw-cfg-key', v.key);
-  await Sync.init(); App.render();
-};
-Forms.syncLogin = async (v, f) => {
-  syncErr = '';
-  try { await Sync.signIn(v.email, v.pw, f._signup); f._signup = false; App.toast('Angemeldet – Daten werden synchronisiert'); }
-  catch (e) { syncErr = /Invalid login/i.test(e.message) ? 'E-Mail oder Passwort falsch.' : /confirm/i.test(e.message) ? 'Bitte bestätige zuerst deine E-Mail (Link im Postfach).' : e.message; }
-  App.render();
-};
-Actions.syncSignup = async () => {
-  const f = $('form[data-f="syncLogin"]'); if (!f.reportValidity()) return;
-  const email = f.elements.email.value.trim(), pw = f.elements.pw.value;
-  syncErr = '';
-  try { const r = await Sync.signIn(email, pw, true); syncErr = r === 'confirm' ? 'Konto erstellt! Bestätige den Link in deiner E-Mail und melde dich dann hier an.' : ''; if (r === 'ok') App.toast('Konto erstellt und angemeldet'); }
-  catch (e) { syncErr = e.message; }
-  App.render();
-};
 Actions.syncNow = () => Sync.pull(false);
-Actions.syncOut = async () => { await Sync.signOut(); App.render(); };
-Actions.syncReset = () => { localStorage.removeItem('mw-cfg-url'); localStorage.removeItem('mw-cfg-key'); Sync.client = null; Sync.state = 'off'; App.render(); };
+Actions.syncOut = () => App.confirm('Abmelden? Deine Daten bleiben sicher in deinem Konto gespeichert.', () => Sync.signOut(), 'Abmelden');
 Actions.exportData = () => {
   const out = {}; Store.keys().forEach(k => out[k] = Store.raw(k));
-  const blob = new Blob([JSON.stringify({ app: 'mein-weg', v: 1, at: new Date().toISOString(), data: out })], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `mein-weg-backup-${today()}.json`; document.body.appendChild(a); a.click(); a.remove();
+  const blob = new Blob([JSON.stringify({ app: 'the-lore', v: 1, at: new Date().toISOString(), data: out })], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `the-lore-backup-${today()}.json`; document.body.appendChild(a); a.click(); a.remove();
 };
 Changes.importData = async el => {
   const f = el.files && el.files[0]; if (!f) return;
   try {
-    const j = JSON.parse(await f.text()); if (j.app !== 'mein-weg') throw new Error();
+    const j = JSON.parse(await f.text()); if ((j.app !== 'the-lore' && j.app !== 'mein-weg')) throw new Error();
     App.confirm('Backup einspielen? Gleichnamige Einträge werden überschrieben.', () => { Object.entries(j.data).forEach(([k, r]) => { Store.put(k, r.d, Date.now()); Sync.mark(k); }); App.applyTheme(); App.render(); App.toast('Backup geladen'); }, 'Einspielen');
   } catch (e) { App.toast('Das ist keine gültige Backup-Datei.'); }
 };
 
+/* ===== Anmelden / Registrieren ===== */
+const AUTH_ERR = [[/invalid login/i, 'E-Mail oder Passwort falsch.'], [/not confirmed/i, 'Bitte bestätige zuerst deine E-Mail – der Link ist in deinem Postfach.'], [/already registered|already been registered/i, 'Diese E-Mail ist schon registriert. Melde dich an.'],
+  [/at least 6|weak/i, 'Das Passwort muss mindestens 6 Zeichen haben.'], [/rate limit|too many|security purposes/i, 'Zu viele Versuche – bitte warte ein paar Minuten.'], [/fetch|network/i, 'Keine Verbindung. Bist du online?'], [/invalid.*email|email.*invalid/i, 'Bitte gib eine gültige E-Mail-Adresse ein.']];
+const authErr = e => { const m = (e && e.message) || String(e); const f = AUTH_ERR.find(([r]) => r.test(m)); return f ? f[1] : m; };
+const Auth = {
+  mode: 'login', err: '', msg: '', busy: false, email: '',
+  render() {
+    let body;
+    if (!Sync.client && Sync.state === 'init') body = '<p class="empty" style="text-align:center">Lädt …</p>';
+    else if (!Sync.client) body = `<p style="margin-bottom:12px">${esc(Sync.msg || 'Keine Verbindung zum Server.')}</p><button class="pri" style="width:100%" data-a="authRetry">Nochmal versuchen</button>`;
+    else if (Sync.recovery) body = `<form data-f="authNewPw" class="stack"><h2 style="margin:0">Neues Passwort</h2><label>Neues Passwort<input id="anpw" name="pw" type="password" autocomplete="new-password" minlength="6" required></label><button class="pri" ${this.busy ? 'disabled' : ''}>Passwort speichern</button></form>`;
+    else if (this.mode === 'reset') body = `<form data-f="authReset" class="stack"><h2 style="margin:0">Passwort vergessen</h2><p class="small">Wir schicken dir einen Link, mit dem du ein neues Passwort festlegst.</p><label>E-Mail<input id="aemail" name="email" type="email" autocomplete="email" required value="${esc(Auth.email || '')}"></label><button class="pri" ${this.busy ? 'disabled' : ''}>Link senden</button><button type="button" class="ghost" data-a="authMode" data-v="login">Zurück zur Anmeldung</button></form>`;
+    else {
+      const reg = this.mode === 'register';
+      body = `<div class="seg" style="width:100%;margin-bottom:14px"><button class="grow" data-a="authMode" data-v="login" aria-pressed="${!reg}">Anmelden</button><button class="grow" data-a="authMode" data-v="register" aria-pressed="${reg}">Registrieren</button></div>
+        <form data-f="authLogin" class="stack"><label>E-Mail<input id="aemail" name="email" type="email" autocomplete="email" required value="${esc(Auth.email || '')}"></label>
+        <label>Passwort<input id="apw" name="pw" type="password" autocomplete="${reg ? 'new-password' : 'current-password'}" minlength="6" required></label>
+        ${reg ? '<label>Passwort wiederholen<input id="apw2" name="pw2" type="password" autocomplete="new-password" minlength="6" required></label>' : ''}
+        <button class="pri" ${this.busy ? 'disabled' : ''}>${this.busy ? 'Einen Moment …' : reg ? 'Konto erstellen' : 'Anmelden'}</button>
+        ${reg ? '' : '<button type="button" class="ghost" data-a="authMode" data-v="reset">Passwort vergessen?</button>'}</form>`;
+    }
+    return `<div class="authwrap"><div class="authcard">${LOGO}<h1>The Lore</h1><p class="muted" style="margin:4px 0 18px">Essen, Training, Gesicht & Termine – alles in einer App.</p>
+      ${this.err ? `<p class="amsg err">${esc(this.err)}</p>` : ''}${this.msg ? `<p class="amsg">${esc(this.msg)}</p>` : ''}${body}</div></div>`;
+  }
+};
+Actions.authMode = el => { Auth.mode = el.dataset.v; Auth.err = ''; Auth.msg = ''; App.render(); };
+Actions.authRetry = () => { Sync.state = 'init'; App.render(); Sync.init(); };
+Forms.authLogin = async v => {
+  const reg = Auth.mode === 'register';
+  Auth.err = ''; Auth.msg = ''; Auth.email = v.email;
+  if (reg && v.pw !== v.pw2) { Auth.err = 'Die Passwörter stimmen nicht überein.'; App.render(); return; }
+  Auth.busy = true; App.render();
+  try {
+    const r = await Sync.signIn(v.email, v.pw, reg);
+    if (r === 'confirm') { Auth.mode = 'login'; Auth.msg = `Fast geschafft! Wir haben dir eine E-Mail an ${v.email} geschickt. Klick auf den Link darin, dann bist du angemeldet.`; }
+  } catch (e) { Auth.err = authErr(e); }
+  Auth.busy = false; App.render();
+};
+Forms.authReset = async v => {
+  Auth.err = ''; Auth.busy = true; App.render();
+  try { await Sync.resetPw(v.email); Auth.mode = 'login'; Auth.msg = 'Falls ein Konto existiert, ist der Link unterwegs. Schau in dein Postfach.'; }
+  catch (e) { Auth.err = authErr(e); }
+  Auth.busy = false; App.render();
+};
+Forms.authNewPw = async v => {
+  Auth.err = ''; Auth.busy = true; App.render();
+  try { await Sync.updatePw(v.pw); Auth.msg = ''; App.toast('Neues Passwort gespeichert'); }
+  catch (e) { Auth.err = authErr(e); }
+  Auth.busy = false; App.render();
+};
+
 App.start();
+FX.init();
+Rig.start();

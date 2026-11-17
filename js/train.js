@@ -4,8 +4,8 @@ const EX_IMG = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/
 const EQUIP_DE = { barbell: 'Langhantel', dumbbell: 'Kurzhantel', other: 'Sonstiges', 'body only': 'Körpergewicht', cable: 'Kabelzug', none: 'Ohne Gerät', machine: 'Maschine', kettlebells: 'Kettlebell', bands: 'Widerstandsband', 'medicine ball': 'Medizinball', 'exercise ball': 'Gymnastikball', 'foam roll': 'Faszienrolle', 'e-z curl bar': 'SZ-Stange' };
 const CAT_DE = { strength: 'Kraft', stretching: 'Dehnen', plyometrics: 'Sprungkraft', powerlifting: 'Powerlifting', 'olympic weightlifting': 'Gewichtheben', strongman: 'Strongman', cardio: 'Cardio' };
 const LVL_DE = { beginner: 'Anfänger', intermediate: 'Fortgeschritten', expert: 'Profi' };
-const FCOLORS = ['#f7b6d2', '#c7a4f0', '#8fd9cf', '#f9d27a', '#9cc8f5', '#f7a58f'];
-const SYN = { kniebeuge: 'squat', bankdrücken: 'bench press', kreuzheben: 'deadlift', klimmzug: 'pull', klimmzüge: 'pull', liegestütz: 'push-up|pushup', ausfallschritt: 'lunge', rudern: 'row', schulterdrücken: 'shoulder press|military press', seitheben: 'lateral raise', hüftheben: 'hip thrust|glute bridge|bridge', 'hip thrust': 'hip thrust', wadenheben: 'calf', beinpresse: 'leg press', latzug: 'pulldown', fliegende: 'fly|flye', butterfly: 'fly|flye', dehnen: 'stretch', dehnung: 'stretch', bauch: 'crunch|ab |sit-up|plank', unterarmstütz: 'plank', po: 'glute|hip thrust', beinstrecker: 'leg extension', beincurl: 'leg curl', trizeps: 'tricep', bizeps: 'curl', springen: 'jump', seilspringen: 'rope jumping', laufen: 'running|jog', rad: 'bicycl|cycling', hantel: 'dumbbell|barbell', kurzhantel: 'dumbbell', langhantel: 'barbell', kabel: 'cable', ' band': 'band' };
+const FCOLORS = ['#a3243a', '#54458a', '#2f6b5a', '#8a6a1c', '#3e5f86', '#7a2d6e'];
+const SYN = { kniebeuge: 'squat', bankdrücken: 'bench press', bank: 'bench', brust: 'chest|bench|fly|push', rücken: 'row|pulldown|pull-up|deadlift', schulter: 'shoulder|raise|press', bein: 'squat|leg|lunge', arm: 'curl|tricep', kreuzheben: 'deadlift', klimmzug: 'pull', klimmzüge: 'pull', liegestütz: 'push-up|pushup', ausfallschritt: 'lunge', rudern: 'row', schulterdrücken: 'shoulder press|military press', seitheben: 'lateral raise', hüftheben: 'hip thrust|glute bridge|bridge', 'hip thrust': 'hip thrust', wadenheben: 'calf', beinpresse: 'leg press', latzug: 'pulldown', fliegende: 'fly|flye', butterfly: 'fly|flye', dehnen: 'stretch', dehnung: 'stretch', bauch: 'crunch|ab |sit-up|plank', unterarmstütz: 'plank', po: 'glute|hip thrust', beinstrecker: 'leg extension', beincurl: 'leg curl', trizeps: 'tricep', bizeps: 'curl', springen: 'jump', seilspringen: 'rope jumping', laufen: 'running|jog', rad: 'bicycl|cycling', hantel: 'dumbbell|barbell', kurzhantel: 'dumbbell', langhantel: 'barbell', kabel: 'cable', ' band': 'band' };
 const STARTER = [
   { name: 'Oberkörper', color: FCOLORS[0], ex: ['Barbell_Bench_Press_-_Medium_Grip', 'Incline_Dumbbell_Press', 'Dumbbell_Shoulder_Press', 'Side_Lateral_Raise', 'Triceps_Pushdown'] },
   { name: 'Rücken & Arme', color: FCOLORS[1], ex: ['Wide-Grip_Lat_Pulldown', 'Seated_Cable_Rows', 'Bent_Over_Barbell_Row', 'Dumbbell_Bicep_Curl', 'Barbell_Curl'] },
@@ -26,11 +26,7 @@ const Train = {
   active() { try { return JSON.parse(localStorage.getItem('mw-active')); } catch (e) { return null; } },
   setActive(a) { if (a) localStorage.setItem('mw-active', JSON.stringify(a)); else localStorage.removeItem('mw-active'); },
   name(id) { const e = this.byId[id]; return e ? e.n : id.replace(/_/g, ' '); },
-  anim(id, cls = '') {
-    const e = this.byId[id], u = EX_IMG + encodeURIComponent(id) + '/';
-    if (e && e.img === 0) return `<div class="anim ${cls}"></div>`;
-    return `<div class="anim ${cls}"><img src="${u}0.jpg" alt="" loading="lazy">${!e || e.img > 1 ? `<img src="${u}1.jpg" alt="" loading="lazy">` : ''}</div>`;
-  },
+  anim(id, cls = '') { return `<div class="anim ${cls}">${Rig.svg(id)}</div>`; },
   muscles(e) { return e ? e.pm.map(m => MUSCLE_DE[m] || m).join(', ') : ''; },
   filtered() {
     let list = this.ex || [];
@@ -38,7 +34,7 @@ const Train = {
     if (this.fe) list = list.filter(e => e.eq === this.fe);
     const q = this.q.toLowerCase().trim();
     if (q) {
-      const alts = [q]; Object.entries(SYN).forEach(([de, en]) => { if (q.includes(de.trim())) alts.push(...en.split('|')); });
+      const alts = [q], words = q.split(/\s+/); Object.entries(SYN).forEach(([de, en]) => { de = de.trim(); if (q === de || words.some(w => w.startsWith(de))) alts.push(...en.split('|')); });
       list = list.filter(e => { const n = e.n.toLowerCase(); return alts.some(a => n.includes(a)) || e.pm.some(m => (MUSCLE_DE[m] || '').toLowerCase().includes(q)); });
     }
     return list;
@@ -135,7 +131,7 @@ function bodyView() {
     selInfo = `<div class="card" style="margin-top:12px"><h3>${MUSCLE_DE[sel]}: ${num(s.c[sel] || 0, 1)} Sätze</h3>${top.length ? `<ul class="list">${top.map(([id, n]) => `<li><span class="t">${esc(Train.name(id))}</span><span class="num">${n} Sätze</span></li>`).join('')}</ul>` : `<p class="small">Diesen Monat noch nicht trainiert. Tipp: Suche unter „Übungen“ nach ${MUSCLE_DE[sel]}.</p><button style="margin-top:8px" data-a="trFindMuscle" data-v="${sel}">Übungen für ${MUSCLE_DE[sel]}</button>`}</div>`;
   }
   return `${monthNav('trMonth')}
-    <div class="bodymap"><div class="card">${Body.svg(s.c, sel)}<div class="legend" style="margin-top:8px"><span>wenig</span><i></i><span>viel</span></div><p class="small" style="margin-top:6px">Tippe auf einen Muskel für Details.</p></div>
+    <div class="bodymap"><div class="card"><div class="row between" style="margin-bottom:8px"><span class="small">Je röter, desto mehr trainiert</span>${Body.sexSwitch()}</div>${Body.svg(s.c, sel)}<div class="legend" style="margin-top:8px"><span>wenig</span><i></i><span>viel</span></div><p class="small" style="margin-top:6px">Tippe auf einen Muskel für Details.</p></div>
     <div><div class="card"><h2>${entries.length ? 'Am meisten trainiert' : 'Noch keine Daten'}</h2>
     ${entries.length ? entries.map(([m, n]) => `<div class="macro" style="margin-bottom:10px;cursor:pointer" data-a="bodySel" data-v="${m}"><div class="row"><span>${MUSCLE_DE[m]}</span><span class="num">${num(n, 1)} Sätze</span></div><div class="bar"><i style="width:${n / max * 100}%;background:${Body.color(n / max)}"></i></div></div>`).join('') : '<p class="small">Sobald du Workouts abschließt, färbt sich der Körper: je dunkler, desto mehr Sätze für diesen Muskel. Hilfsmuskeln zählen halb.</p>'}
     </div>${selInfo}</div></div>`;
@@ -208,6 +204,8 @@ Actions.trDetail = el => {
     const fl = Train.folders();
     return `${App.sheetHead(esc(e.n))}${Train.anim(id)}
       <div class="chips" style="margin:12px 0"><span class="tag">${LVL_DE[e.l] || e.l}</span><span class="tag">${EQUIP_DE[e.eq] || e.eq}</span><span class="tag">${CAT_DE[e.c] || e.c}</span></div>
+      <div class="card" style="padding:12px;margin-bottom:12px">${Body.svg(Body.forExercise(e), null, { mini: true, max: 1 })}
+        <div class="musclekey"><span><i style="background:${Body.color(1)}"></i>Hauptmuskel</span><span><i style="background:${Body.color(.45)}"></i>Hilfsmuskel</span></div></div>
       <p><b>Hauptmuskeln:</b> ${e.pm.map(m => MUSCLE_DE[m]).join(', ')}${e.sm.length ? `<br><b>Hilfsmuskeln:</b> ${e.sm.map(m => MUSCLE_DE[m]).join(', ')}` : ''}</p>
       ${fl.length ? `<p class="small" style="margin:14px 0 6px">In Mappe speichern</p><div class="chips">${fl.map(f => `<button class="chip" data-a="trInFolder" data-v="${f.id}|${esc(id)}" aria-pressed="${f.ex.includes(id)}"><span class="dotc" style="background:${f.color}"></span> ${esc(f.name)}</button>`).join('')}</div>` : ''}
       <h3 style="margin:16px 0 6px">Anleitung <span class="small">(Englisch)</span></h3><ol style="margin:0;padding-left:20px;display:grid;gap:6px">${e.i.map(s => `<li>${esc(s)}</li>`).join('')}</ol>`;
@@ -232,10 +230,28 @@ Actions.trFinish = () => {
   if (!ex.length) { App.toast('Hake mindestens einen Satz ab (✓), um das Workout zu speichern.'); return; }
   const d = iso(new Date(a.start)), k = 'wk:' + d.slice(0, 7);
   const list = Train.wk(d.slice(0, 7)); list.push({ id: uid(), date: d, start: a.start, dur: Math.round((Date.now() - a.start) / 1000), name: a.name, folderId: a.folderId, ex });
+  const w = list[list.length - 1];
   Store.set(k, { list }); Train.setActive(null); Train.sub = 'verlauf'; Train.month = d.slice(0, 7);
-  App.render(); App.toast('Stark! Workout gespeichert');
+  App.render(); workoutSummary(w, true);
 };
+function workoutSummary(w, fresh) {
+  App.modal(() => {
+    const c = Body.forWorkout(w), sets = w.ex.reduce((a, x) => a + x.sets.length, 0), vol = w.ex.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.r * s.kg, 0), 0);
+    const top = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([m]) => MUSCLE_DE[m]);
+    return `${App.sheetHead(fresh ? 'Workout geschafft!' : esc(w.name))}
+      <p class="small">${esc(w.name)} · ${fmtDate(w.date)}</p>
+      <div class="sumstats"><div><b>${fmtDur(w.dur).replace(' Min', '′').replace(' Std ', 'h ')}</b><span>Dauer</span></div><div><b>${sets}</b><span>Sätze</span></div><div><b>${num(vol)}</b><span>kg bewegt</span></div></div>
+      <div class="row between" style="margin-bottom:6px"><h3>Das hast du trainiert</h3>${Body.sexSwitch()}</div>
+      <div class="card" style="padding:10px">${Body.svg(c, null, { mini: true })}<div class="legend" style="margin-top:6px"><span>wenig</span><i></i><span>viel</span></div></div>
+      ${top.length ? `<p style="margin:10px 0">Am stärksten: <b>${top.join(', ')}</b></p>` : ''}
+      <div class="stack">${w.ex.map(x => `<div class="exrow">${Train.anim(x.id, 'sm')}<span class="t"><b>${esc(Train.name(x.id))}</b><span class="small">${x.sets.map(s => `${num(s.r)} × ${num(s.kg, 1)} kg`).join(' · ')}</span></span></div>`).join('')}</div>
+      ${fresh ? '<button class="pri" style="width:100%;margin-top:14px" data-a="closeModal">Fertig</button>' : `<button class="danger" style="width:100%;margin-top:14px" data-a="trDelWorkout" data-v="${w.id}">${ic('trash')} Workout löschen</button>`}`;
+  });
+}
 Actions.trShow = el => {
+  const w = Train.wk(Train.month).find(x => x.id === el.dataset.v); if (w) workoutSummary(w, false);
+};
+Actions.trShowOld = el => {
   const w = Train.wk(Train.month).find(x => x.id === el.dataset.v); if (!w) return;
   App.modal(() => `${App.sheetHead(esc(w.name))}<p class="small" style="margin-bottom:12px">${fmtDate(w.date)} · ${fmtDur(w.dur)}</p>
     <div class="stack">${w.ex.map(x => `<div class="exrow">${Train.anim(x.id, 'sm')}<span class="t"><b>${esc(Train.name(x.id))}</b><span class="small">${x.sets.map(s => `${num(s.r)} × ${num(s.kg, 1)} kg`).join(' · ')}</span></span></div>`).join('')}</div>

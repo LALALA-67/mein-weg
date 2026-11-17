@@ -3,70 +3,131 @@
 const FACE_ANIMS = {
   puff: 'Wangen aufblasen', fish: 'Fischmund', brow: 'Augenbrauen heben', jaw: 'Mund weit öffnen', smile: 'Lächeln halten', squint: 'Augen zukneifen',
   neck: 'Kopf zurück + Kussmund', tilt: 'Kopf seitlich neigen', vowel: 'O und E formen', tongue: 'Zunge rausstrecken', eyes: 'Augen kreisen',
-  jawside: 'Kiefer seitlich', massage: 'Wangen massieren', chin: 'Kinn vorschieben', none: 'Ruhig halten'
+  jawside: 'Kiefer seitlich', chin: 'Kinn vorschieben', massage: 'Wangen kreisen', forehead: 'Stirn ausstreichen', temples: 'Schläfen kreisen',
+  eyesmass: 'Augenpartie massieren', lymph: 'Hals ausstreichen', knuckle: 'Knöchel am Kiefer',
+  gs1: 'Gua Sha ① Hals', gs2: 'Gua Sha ② Kiefer', gs3: 'Gua Sha ③ Mundwinkel', gs4: 'Gua Sha ④ Wangen', gs5: 'Gua Sha ⑤ Nase', gs6: 'Gua Sha ⑥ Unter den Augen', gs7: 'Gua Sha ⑦ Stirn', gs8: 'Gua Sha ⑧ Brauen', gsall: 'Gua Sha Übersicht', none: 'Ruhig halten'
 };
+const FACE_CATS = ['Alle', 'Training', 'Massage', 'Gua Sha', 'Dehnen', 'Augen'];
 const FACE_LIB = [
-  { id: 'puff', name: 'Wangen aufblasen', anim: 'puff', sec: 30, desc: 'Atme ein und blase beide Wangen mit Luft auf.\nHalte 5 Sekunden, dann lass die Luft langsam raus.\nVariante: Schiebe die Luft von einer Wange in die andere.' },
-  { id: 'fish', name: 'Fischmund', anim: 'fish', sec: 30, desc: 'Sauge die Wangen nach innen, sodass die Lippen nach vorne kommen.\nHalte die Spannung 5 Sekunden.\nLocker lassen und wiederholen.' },
-  { id: 'brow', name: 'Augenbrauen heben', anim: 'brow', sec: 30, desc: 'Ziehe die Augenbrauen so hoch du kannst und öffne die Augen weit.\n3 Sekunden halten, dann entspannen.\nTipp: Stirn mit den Fingern leicht gegenhalten für mehr Widerstand.' },
-  { id: 'jaw', name: 'Mund weit öffnen', anim: 'jaw', sec: 40, desc: 'Öffne den Mund so weit es angenehm geht.\n3 Sekunden halten, dann langsam schließen.\nNicht ruckartig – kein Schmerz!' },
-  { id: 'smile', name: 'Lächeln halten', anim: 'smile', sec: 30, desc: 'Lächle so breit du kannst, die Wangen gehen nach oben.\n10 Sekunden halten.\nEntspannen und wiederholen.' },
-  { id: 'squint', name: 'Augen zukneifen', anim: 'squint', sec: 30, desc: 'Kneife die Augen fest zusammen.\n3 Sekunden halten, dann weit öffnen.\nGut für die Muskeln rund um die Augen.' },
-  { id: 'neck', name: 'Decke küssen (Kinnlinie)', anim: 'neck', sec: 40, desc: 'Lege den Kopf langsam in den Nacken und schau zur Decke.\nSpitze die Lippen zu einem Kussmund.\n5–10 Sekunden halten, dann zurück. Spürst du die Spannung am Hals?' },
-  { id: 'tilt', name: 'Hals seitlich dehnen', anim: 'tilt', sec: 40, desc: 'Neige den Kopf langsam zur linken Schulter.\n10 Sekunden halten, dann zur rechten Seite.\nSchultern bleiben unten.' },
-  { id: 'vowel', name: 'O – E Übung', anim: 'vowel', sec: 40, desc: 'Forme mit den Lippen ein großes „O“.\nWechsle zu einem breiten „E“.\nÜbertreibe die Bewegung ruhig.' },
-  { id: 'tongue', name: 'Zunge zum Kinn', anim: 'tongue', sec: 30, desc: 'Öffne den Mund und strecke die Zunge Richtung Kinn.\n5 Sekunden halten.\nZurückziehen und wiederholen.' },
-  { id: 'eyes', name: 'Augen kreisen', anim: 'eyes', sec: 30, desc: 'Kopf bleibt still.\nLass die Augen langsam im Kreis wandern.\nNach der Hälfte die Richtung wechseln.' },
-  { id: 'jawside', name: 'Kiefer seitlich', anim: 'jawside', sec: 30, desc: 'Mund leicht öffnen.\nSchiebe den Unterkiefer langsam nach links, dann nach rechts.\nRuhig und kontrolliert.' },
-  { id: 'massage', name: 'Wangen-Massage', anim: 'massage', sec: 60, desc: 'Lege die Fingerspitzen auf die Wangen.\nMassiere in kleinen Kreisen von unten nach oben.\nAm besten mit etwas Gesichtsöl oder Creme.' },
-  { id: 'chin', name: 'Kinn vorschieben', anim: 'chin', sec: 30, desc: 'Schiebe den Unterkiefer nach vorne.\nZiehe die Unterlippe nach oben.\n5 Sekunden halten, entspannen.' }
+  { id: 'puff', cat: 'Training', name: 'Wangen aufblasen', anim: 'puff', sec: 30, desc: 'Atme ein und blase beide Wangen mit Luft auf.\nHalte 5 Sekunden, dann lass die Luft langsam raus.\nVariante: Schiebe die Luft von einer Wange in die andere.' },
+  { id: 'fish', cat: 'Training', name: 'Fischmund', anim: 'fish', sec: 30, desc: 'Sauge die Wangen nach innen, sodass die Lippen nach vorne kommen.\nHalte die Spannung 5 Sekunden.\nLocker lassen und wiederholen.' },
+  { id: 'brow', cat: 'Training', name: 'Augenbrauen heben', anim: 'brow', sec: 30, desc: 'Ziehe die Augenbrauen so hoch du kannst und öffne die Augen weit.\n3 Sekunden halten, dann entspannen.\nTipp: Stirn mit den Fingern leicht gegenhalten für mehr Widerstand.' },
+  { id: 'jaw', cat: 'Training', name: 'Mund weit öffnen', anim: 'jaw', sec: 40, desc: 'Öffne den Mund so weit es angenehm geht.\n3 Sekunden halten, dann langsam schließen.\nNicht ruckartig – kein Schmerz!' },
+  { id: 'smile', cat: 'Training', name: 'Lächeln halten', anim: 'smile', sec: 30, desc: 'Lächle so breit du kannst, die Wangen gehen nach oben.\n10 Sekunden halten.\nEntspannen und wiederholen.' },
+  { id: 'neck', cat: 'Training', name: 'Decke küssen (Kinnlinie)', anim: 'neck', sec: 40, desc: 'Lege den Kopf langsam in den Nacken und schau zur Decke.\nSpitze die Lippen zu einem Kussmund.\n5–10 Sekunden halten, dann zurück.' },
+  { id: 'vowel', cat: 'Training', name: 'O – E Übung', anim: 'vowel', sec: 40, desc: 'Forme mit den Lippen ein großes „O“.\nWechsle zu einem breiten „E“.\nÜbertreibe die Bewegung ruhig.' },
+  { id: 'tongue', cat: 'Training', name: 'Zunge zum Kinn', anim: 'tongue', sec: 30, desc: 'Öffne den Mund und strecke die Zunge Richtung Kinn.\n5 Sekunden halten.\nZurückziehen und wiederholen.' },
+  { id: 'jawside', cat: 'Training', name: 'Kiefer seitlich', anim: 'jawside', sec: 30, desc: 'Mund leicht öffnen.\nSchiebe den Unterkiefer langsam nach links, dann nach rechts.\nRuhig und kontrolliert.' },
+  { id: 'chin', cat: 'Training', name: 'Kinn vorschieben', anim: 'chin', sec: 30, desc: 'Schiebe den Unterkiefer nach vorne.\nZiehe die Unterlippe nach oben.\n5 Sekunden halten, entspannen.' },
+  { id: 'tilt', cat: 'Dehnen', name: 'Hals seitlich dehnen', anim: 'tilt', sec: 40, desc: 'Neige den Kopf langsam zur linken Schulter.\n10 Sekunden halten, dann zur rechten Seite.\nSchultern bleiben unten.' },
+  { id: 'squint', cat: 'Augen', name: 'Augen zukneifen', anim: 'squint', sec: 30, desc: 'Kneife die Augen fest zusammen.\n3 Sekunden halten, dann weit öffnen.\nGut für die Muskeln rund um die Augen.' },
+  { id: 'eyes', cat: 'Augen', name: 'Augen kreisen', anim: 'eyes', sec: 30, desc: 'Kopf bleibt still.\nLass die Augen langsam im Kreis wandern.\nNach der Hälfte die Richtung wechseln.' },
+  { id: 'eyesmass', cat: 'Augen', name: 'Augenpartie massieren', anim: 'eyesmass', sec: 45, desc: 'Lege die Ringfinger unter die Augen – sie drücken am sanftesten.\nKleine Kreise von innen nach außen Richtung Schläfe.\nGut gegen Schwellungen am Morgen.' },
+  { id: 'massage', cat: 'Massage', name: 'Wangen-Massage', anim: 'massage', sec: 60, desc: 'Lege Zeige-, Mittel- und Ringfinger auf die Wangen.\nMassiere in kleinen Kreisen von unten nach oben.\nMit etwas Gesichtsöl oder Creme gleiten die Finger besser.' },
+  { id: 'forehead', cat: 'Massage', name: 'Stirn ausstreichen', anim: 'forehead', sec: 45, desc: 'Lege die Finger über die Augenbrauen.\nStreiche abwechselnd mit beiden Händen nach oben bis zum Haaransatz.\nLöst Spannung und glättet die Stirn.' },
+  { id: 'temples', cat: 'Massage', name: 'Schläfen kreisen', anim: 'temples', sec: 45, desc: 'Lege die Fingerspitzen auf die Schläfen.\nKreise langsam mit leichtem Druck.\nAtme dabei ruhig – hilft auch bei Kopfspannung.' },
+  { id: 'lymph', cat: 'Massage', name: 'Lymphdrainage Hals', anim: 'lymph', sec: 45, desc: 'Lege die flachen Finger unter die Ohren.\nStreiche sanft am Hals entlang nach unten zum Schlüsselbein.\nNur leichter Druck – das entwässert und entschwellt.' },
+  { id: 'knuckle', cat: 'Massage', name: 'Knöchel am Kiefer', anim: 'knuckle', sec: 45, desc: 'Mach lockere Fäuste und lege die Knöchel ans Kinn.\nZiehe sie entlang der Kieferlinie bis unter die Ohren.\nLöst verspannte Kaumuskeln.' },
+  { id: 'gsall', cat: 'Gua Sha', name: 'Gua Sha komplett (alle Zonen)', anim: 'gsall', sec: 120, desc: 'Gesichtsöl auftragen, Stein flach (ca. 15°) halten.\nArbeite die Zonen ① bis ⑧ von unten nach oben ab.\nImmer von der Mitte nach außen und nach oben streichen, je 5–10 Züge pro Zone und Seite.' },
+  { id: 'gs1', cat: 'Gua Sha', name: '① Hals', anim: 'gs1', sec: 45, desc: 'Setze den Stein am unteren Hals an.\nStreiche sanft nach oben und außen bis unter den Kiefer.\nNur leichter Druck am Hals.' },
+  { id: 'guasha', cat: 'Gua Sha', name: '② Kieferlinie', anim: 'gs2', sec: 60, desc: 'Setze die Kerbe des Steins am Kinn an.\nZiehe entlang der Kieferlinie bis zum Ohr.\nJede Seite 5–10 Mal.' },
+  { id: 'gs3', cat: 'Gua Sha', name: '③ Mundwinkel', anim: 'gs3', sec: 45, desc: 'Setze den Stein unter dem Mundwinkel an.\nStreiche nach oben Richtung Wangenknochen und weiter zum Ohr.\nGlättet die Lachfalten.' },
+  { id: 'guashacheek', cat: 'Gua Sha', name: '④ Wangen', anim: 'gs4', sec: 60, desc: 'Setze den Stein neben der Nase unter dem Wangenknochen an.\nZiehe flach nach außen bis zum Ohr.\nAm Ende kurz wackeln, dann neu ansetzen.' },
+  { id: 'gs5', cat: 'Gua Sha', name: '⑤ Nase', anim: 'gs5', sec: 30, desc: 'Setze die schmale Seite neben dem Nasenflügel an.\nStreiche entlang der Nase nach oben.\nGanz sanft – die Haut ist hier dünn.' },
+  { id: 'gs6', cat: 'Gua Sha', name: '⑥ Unter den Augen', anim: 'gs6', sec: 45, desc: 'Stein sehr flach unter dem inneren Augenwinkel ansetzen.\nNach außen Richtung Schläfe streichen.\nKaum Druck – gut gegen Schwellungen.' },
+  { id: 'gs7', cat: 'Gua Sha', name: '⑦ Stirn', anim: 'gs7', sec: 45, desc: 'Setze den Stein zwischen den Augenbrauen an.\nStreiche gerade nach oben bis zum Haaransatz.\nArbeite dich von der Mitte zu den Seiten.' },
+  { id: 'gs8', cat: 'Gua Sha', name: '⑧ Augenbrauen', anim: 'gs8', sec: 45, desc: 'Setze den Stein über der Augenbraue innen an.\nStreiche im Bogen über die Braue zur Schläfe.\nAn der Schläfe kurz halten.' }
 ];
 const FACE_DEF_ROUTINES = [
-  { id: 'r-glow', name: 'Morgen-Glow', items: [['puff', 30], ['fish', 30], ['brow', 30], ['smile', 30], ['eyes', 30]] },
-  { id: 'r-jaw', name: 'Kinnlinie & Hals', items: [['neck', 40], ['jaw', 30], ['jawside', 30], ['chin', 30], ['tilt', 40]] }
+  { id: 'r-glow', name: 'Morgen-Glow', items: [['eyesmass', 45], ['puff', 30], ['forehead', 45], ['smile', 30], ['lymph', 45]] },
+  { id: 'r-jaw', name: 'Kinnlinie & Hals', items: [['neck', 40], ['jaw', 30], ['knuckle', 45], ['guasha', 60], ['gs1', 45], ['tilt', 40]] }
 ].map(r => ({ ...r, items: r.items.map(([ex, sec]) => ({ ex, sec })) }));
 
+/* Hände und Gua-Sha-Stein für Massage-Animationen (Spitze des Mittelfingers = 0,0, zeigt nach oben) */
+const HAND = `<g class="hd"><path d="M-14 46 L-17 125 L23 125 L19 46Z"/><rect class="sleeve" x="-19" y="100" width="44" height="30" rx="4"/>
+  <path d="M-12 31 Q-24 27 -27 14 Q-28 8 -23 9 Q-19 11 -16 21 L-11 26Z"/>
+  <rect x="-11" y="5" width="7" height="30" rx="3.5"/><rect x="-3.5" y="0" width="7" height="34" rx="3.5"/><rect x="4" y="4" width="7" height="31" rx="3.5"/><rect x="11" y="10" width="6" height="26" rx="3"/>
+  <path d="M-13 28 Q-15 50 -10 57 L18 57 Q21 44 18 30Z"/><g class="nail"><ellipse cx="-7.5" cy="8" rx="2.3" ry="2.8"/><ellipse cx="0" cy="3" rx="2.3" ry="2.8"/><ellipse cx="7.5" cy="7" rx="2.3" ry="2.8"/><ellipse cx="14" cy="13" rx="2" ry="2.5"/></g></g>`;
+const STONE = `<g class="stone"><path d="M-14 0 Q-12 -14 0 -16 Q12 -14 14 0 Q14 10 6 14 Q0 10 -6 14 Q-14 10 -14 0Z"/><path class="shine" d="M-8 -6 Q-4 -12 4 -12" fill="none"/></g>`;
+const TOOL_POS = {
+  massage: [HAND, 64, 126, 12], forehead: [HAND, 84, 82, 0], temples: [HAND, 50, 98, 28], eyesmass: [HAND, 80, 114, 52],
+  lymph: [HAND, 82, 150, -6], knuckle: [HAND, 92, 168, -46]
+};
+function faceTools(anim) {
+  const t = TOOL_POS[anim]; if (!t) return '';
+  const [shape, x, y, r] = t, one = `<g transform="translate(${x} ${y}) rotate(${r})"><g class="mv">${shape}</g></g>`;
+  return `<g class="tools">${one}<g class="r" transform="translate(200 0) scale(-1 1)">${one}</g></g>`;
+}
+/* Gua-Sha-Zonen: Pfeile (linke Gesichtshälfte, wird gespiegelt) */
+const GS_ZONES = {
+  gs1: ['M98 199 Q84 197 74 183'], gs2: ['M97 177 Q74 172 54 138', 'M96 168 Q78 163 61 130'], gs3: ['M85 160 L84 136', 'M88 166 Q70 158 52 126'],
+  gs4: ['M90 133 Q72 128 50 113', 'M88 141 Q70 139 52 124'], gs5: ['M93 127 L93 107'], gs6: ['M86 111 Q72 115 56 103'],
+  gs7: ['M91 90 L91 62'], gs8: ['M88 80 Q70 67 52 80']
+};
+const GS_NUM = { gs1: [118, 196], gs2: [134, 172], gs3: [120, 152], gs4: [140, 140], gs5: [112, 120], gs6: [146, 106], gs7: [100, 96], gs8: [124, 72] };
+function gsOverlay(anim) {
+  const zones = anim === 'gsall' ? Object.keys(GS_ZONES) : [anim];
+  const dur = 2.6, arrows = (z, i) => GS_ZONES[z].map((d, k) => `<path class="gsar" d="${d}" pathLength="100" marker-end="url(#gsHead)" style="animation-delay:${(i * .35 + k * .2).toFixed(2)}s"/>`).join('');
+  const stone = z => anim === 'gsall' ? '' : GS_ZONES[z].slice(0, 1).map(d => `<g class="gsstone"><path d="M-9 -6 Q0 -12 9 -6 Q12 2 6 7 Q0 4 -6 7 Q-12 2 -9 -6Z" fill="url(#fquartz)" stroke="rgba(150,60,90,.6)"/><path d="M-5 -6 Q0 -9 4 -7" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/><animateMotion dur="${dur}s" repeatCount="indefinite" rotate="auto" path="${d}" keyPoints="0;0;1;1" keyTimes="0;.1;.75;1" calcMode="linear"/></g>`).join('');
+  const side = zones.map((z, i) => arrows(z, i) + stone(z)).join('');
+  const center = zones.includes('gs7') ? `<path class="gsar" d="M100 92 L100 58" pathLength="100" marker-end="url(#gsHead)"/>` : '';
+  const nums = anim === 'gsall' ? zones.map(z => `<g class="gsnum"><circle cx="${GS_NUM[z][0]}" cy="${GS_NUM[z][1]}" r="6.2"/><text x="${GS_NUM[z][0]}" y="${GS_NUM[z][1] + 3}" text-anchor="middle">${z.slice(2)}</text></g>`).join('') : '';
+  return `<defs><marker id="gsHead" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#555a61"/></marker></defs>
+    <g class="gsov">${side}<g transform="translate(200 0) scale(-1 1)">${side}</g>${center}${nums}</g>`;
+}
 function faceSVG(anim, cls = '') {
-  const lip = '#c4507c', dark = '#7a2440', line = '#d3a089';
+  if (anim && anim.startsWith('gs')) cls += ' gs';
+  const lipD = '#a63a55', mouthIn = '#4e1222', line = 'rgba(150,92,72,.55)';
   return `<svg class="face f-${anim} ${cls}" viewBox="0 0 200 230" aria-hidden="true">
-    <path d="M14 230 Q22 200 74 198 L126 198 Q178 200 186 230Z" fill="var(--pink)"/>
-    <path d="M78 150 L78 206 Q100 214 122 206 L122 150Z" fill="var(--skin2)"/>
-    <path class="neckline fl" d="M88 182 Q100 188 112 182 M92 194 Q100 198 108 194" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <defs><radialGradient id="fskin" cx="48%" cy="38%" r="68%"><stop offset="0" stop-color="#f8e1d2"/><stop offset=".65" stop-color="#efcab3"/><stop offset="1" stop-color="#d9a68b"/></radialGradient>
+    <linearGradient id="fhair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2622"/><stop offset="1" stop-color="#160d0b"/></linearGradient>
+    <linearGradient id="flip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c25a72"/><stop offset="1" stop-color="#963049"/></linearGradient>
+    <radialGradient id="firis" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#7b5a3c"/><stop offset="1" stop-color="#2e1c12"/></radialGradient>
+    <linearGradient id="fquartz" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c9d6"/><stop offset="1" stop-color="#d98aa3"/></linearGradient></defs>
+    <path d="M38 104 Q32 28 100 24 Q168 28 162 104 L172 204 Q150 218 132 198 L128 150 L72 150 L68 198 Q50 218 28 204Z" fill="url(#fhair)"/>
+    <path d="M10 230 Q20 198 72 192 L128 192 Q180 198 190 230Z" fill="var(--pink)"/><path d="M84 192 L100 214 L116 192" fill="#e2b49b"/>
+    <path d="M80 140 Q81 176 76 196 Q100 206 124 196 Q119 176 120 140Z" fill="#e6b9a1"/>
+    <path d="M80 150 Q100 176 120 150 L120 164 Q100 184 80 164Z" fill="rgba(140,80,60,.28)"/>
+    <path class="neckline fl" d="M88 182 Q100 188 112 182 M92 193 Q100 197 108 193" stroke="${line}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
     <g class="head">
-      <ellipse cx="100" cy="94" rx="66" ry="76" fill="var(--hair)"/>
-      <ellipse class="bulge" cx="47" cy="134" rx="16" ry="19" fill="var(--skin)"/><ellipse class="bulge" cx="153" cy="134" rx="16" ry="19" fill="var(--skin)"/>
-      <ellipse cx="42" cy="110" rx="8" ry="13" fill="var(--skin2)"/><ellipse cx="158" cy="110" rx="8" ry="13" fill="var(--skin2)"/>
-      <ellipse cx="100" cy="108" rx="58" ry="72" fill="var(--skin)"/>
-      <path d="M42 94 Q46 34 100 32 Q154 34 158 94 Q146 58 106 56 Q86 70 58 70 Q48 78 42 94Z" fill="var(--hair)"/>
-      <path class="fl" d="M76 64 Q100 58 124 64 M80 71 Q100 66 120 71" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <ellipse class="hollow" cx="68" cy="136" rx="9" ry="15" fill="rgba(150,70,60,.22)"/><ellipse class="hollow" cx="132" cy="136" rx="9" ry="15" fill="rgba(150,70,60,.22)"/>
-      <ellipse class="ck" cx="66" cy="128" rx="12" ry="8" fill="var(--blush)" opacity=".65"/><ellipse class="ck" cx="134" cy="128" rx="12" ry="8" fill="var(--blush)" opacity=".65"/>
-      <path class="bw" d="M62 82 Q75 73 89 79" stroke="var(--hair)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path class="bw" d="M111 79 Q125 73 138 82" stroke="var(--hair)" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-      <g class="eye"><ellipse cx="76" cy="98" rx="10" ry="7.5" fill="#fff"/><circle class="pu" cx="76" cy="98" r="4.6" fill="#3d2030"/></g>
-      <g class="eye"><ellipse cx="124" cy="98" rx="10" ry="7.5" fill="#fff"/><circle class="pu" cx="124" cy="98" r="4.6" fill="#3d2030"/></g>
-      <path d="M100 104 Q97 118 93 122 Q100 126 107 122" stroke="${line}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path class="chin" d="M90 170 Q100 175 110 170" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse class="bulge" cx="47" cy="134" rx="15" ry="19" fill="#efcab3"/><ellipse class="bulge" cx="153" cy="134" rx="15" ry="19" fill="#efcab3"/>
+      <ellipse cx="44" cy="112" rx="7" ry="12" fill="#e6b9a1"/><ellipse cx="156" cy="112" rx="7" ry="12" fill="#e6b9a1"/>
+      <path d="M44 102 Q44 50 100 42 Q156 50 156 102 Q156 140 137 160 Q118 179 100 181 Q82 179 63 160 Q44 140 44 102Z" fill="url(#fskin)"/>
+      <path d="M50 120 Q56 150 74 166 Q60 146 58 118Z M150 120 Q144 150 126 166 Q140 146 142 118Z" fill="rgba(170,100,80,.18)"/>
+      <path class="bangs" d="M42 106 Q36 40 100 34 Q162 38 160 102 Q152 64 120 54 Q98 74 66 72 Q52 82 42 106Z" fill="url(#fhair)"/>
+      <path d="M66 70 Q90 66 112 52 M80 66 Q100 58 116 50 M128 58 Q146 72 154 96" stroke="rgba(255,255,255,.08)" stroke-width="1.5" fill="none"/>
+      <path class="fl" d="M78 66 Q100 61 122 66 M82 72 Q100 68 118 72" stroke="${line}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <ellipse class="hollow" cx="70" cy="140" rx="9" ry="15" fill="rgba(140,70,55,.24)"/><ellipse class="hollow" cx="130" cy="140" rx="9" ry="15" fill="rgba(140,70,55,.24)"/>
+      <ellipse class="ck" cx="68" cy="130" rx="13" ry="8" fill="rgba(226,110,124,.32)"/><ellipse class="ck" cx="132" cy="130" rx="13" ry="8" fill="rgba(226,110,124,.32)"/>
+      <path class="bw" d="M61 86 Q73 75 90 81 Q76 80 61 89Z" fill="#33201c"/><path class="bw" d="M139 86 Q127 75 110 81 Q124 80 139 89Z" fill="#33201c"/>
+      <g class="eye"><path d="M65 101 Q76 92 89 101 Q77 108 65 101Z" fill="#fbf7f2"/><g class="pu"><circle cx="77" cy="100.5" r="5" fill="url(#firis)"/><circle cx="77" cy="100.5" r="2.1" fill="#120a07"/><circle cx="78.6" cy="98.8" r="1.1" fill="#fff"/></g><path d="M64 101 Q76 91 90 100" stroke="#24150f" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M66 99 l-3 -3 M70 95.6 l-1.6 -3.4 M75 94 l-.6 -3.6 M80 94 l.6 -3.4 M85 96 l1.6 -3" stroke="#24150f" stroke-width="1.1" stroke-linecap="round"/><path d="M67 103.5 Q77 108 87 103" stroke="${line}" stroke-width="1" fill="none"/></g>
+      <g class="eye"><path d="M135 101 Q124 92 111 101 Q123 108 135 101Z" fill="#fbf7f2"/><g class="pu"><circle cx="123" cy="100.5" r="5" fill="url(#firis)"/><circle cx="123" cy="100.5" r="2.1" fill="#120a07"/><circle cx="124.6" cy="98.8" r="1.1" fill="#fff"/></g><path d="M136 101 Q124 91 110 100" stroke="#24150f" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M134 99 l3 -3 M130 95.6 l1.6 -3.4 M125 94 l.6 -3.6 M120 94 l-.6 -3.4 M115 96 l-1.6 -3" stroke="#24150f" stroke-width="1.1" stroke-linecap="round"/><path d="M133 103.5 Q123 108 113 103" stroke="${line}" stroke-width="1" fill="none"/></g>
+      <path d="M97 100 Q95 114 92 123" stroke="rgba(160,100,80,.45)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M91 125 Q95 129 100 127.5 Q105 129 109 125" stroke="#b07c66" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="100" cy="120" rx="3.5" ry="2.2" fill="rgba(255,255,255,.35)"/>
+      <path class="chin" d="M91 170 Q100 175 109 170" stroke="${line}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       <g class="mouth">
-        <path class="m m-n" d="M86 146 Q100 153 114 146" stroke="${lip}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-        <path class="m m-press" d="M89 148 L111 148" stroke="${lip}" stroke-width="4.5" stroke-linecap="round"/>
-        <g class="m m-fish"><ellipse cx="100" cy="148" rx="7" ry="9" fill="${lip}"/><ellipse cx="100" cy="148" rx="2.5" ry="4" fill="${dark}"/></g>
-        <g class="m m-open"><ellipse cx="100" cy="151" rx="13" ry="13" fill="${dark}"/><rect x="91" y="139" width="18" height="5" rx="2" fill="#fff"/></g>
-        <path class="m m-smile" d="M80 141 Q100 168 120 141 Q100 152 80 141Z" fill="${dark}" stroke="${lip}" stroke-width="3" stroke-linejoin="round"/>
-        <ellipse class="m m-kiss" cx="100" cy="147" rx="7" ry="6" fill="${lip}"/>
-        <ellipse class="m m-o" cx="100" cy="149" rx="8.5" ry="12" fill="${dark}" stroke="${lip}" stroke-width="3"/>
-        <ellipse class="m m-e" cx="100" cy="148" rx="17" ry="4.5" fill="${dark}" stroke="${lip}" stroke-width="3"/>
-        <rect class="tongue" x="93" y="152" width="14" height="24" rx="7" fill="#ec6f92"/>
+        <g class="m m-n"><path d="M86 148 Q93 142 100 145.5 Q107 142 114 148 Q100 150.5 86 148Z" fill="url(#flip)"/><path d="M86 148 Q100 151 114 148 Q108 157 100 157 Q92 157 86 148Z" fill="${lipD}"/><path d="M93 153 Q100 155 106 153" stroke="rgba(255,255,255,.35)" stroke-width="1.2" fill="none"/></g>
+        <path class="m m-press" d="M88 149 Q100 146.5 112 149 Q100 152 88 149Z" fill="${lipD}"/>
+        <g class="m m-fish"><ellipse cx="100" cy="149" rx="7.5" ry="9.5" fill="url(#flip)"/><ellipse cx="100" cy="149" rx="2.6" ry="4.2" fill="${mouthIn}"/></g>
+        <g class="m m-open"><ellipse cx="100" cy="152" rx="13" ry="13.5" fill="${mouthIn}" stroke="${lipD}" stroke-width="3.5"/><path d="M90 141 Q100 139 110 141 L109 146 Q100 147.5 91 146Z" fill="#fff"/></g>
+        <g class="m m-smile"><path d="M79 143 Q100 168 121 143 Q100 152 79 143Z" fill="${mouthIn}" stroke="${lipD}" stroke-width="3" stroke-linejoin="round"/><path d="M84 145.5 Q100 152 116 145.5 L114 150 Q100 155 86 150Z" fill="#fff"/></g>
+        <ellipse class="m m-kiss" cx="100" cy="148" rx="7.5" ry="6.5" fill="url(#flip)"/>
+        <ellipse class="m m-o" cx="100" cy="150" rx="8.5" ry="12" fill="${mouthIn}" stroke="${lipD}" stroke-width="3.5"/>
+        <ellipse class="m m-e" cx="100" cy="149" rx="17" ry="4.5" fill="${mouthIn}" stroke="${lipD}" stroke-width="3.5"/>
+        <rect class="tongue" x="93" y="153" width="14" height="24" rx="7" fill="#e26a88"/>
       </g>
-      <g class="hand"><rect x="40" y="114" width="10" height="26" rx="5" fill="var(--skin2)" stroke="${line}"/><rect x="50" y="110" width="10" height="28" rx="5" fill="var(--skin2)" stroke="${line}"/><rect x="60" y="114" width="10" height="24" rx="5" fill="var(--skin2)" stroke="${line}"/></g>
-      <g class="hand"><rect x="150" y="114" width="10" height="26" rx="5" fill="var(--skin2)" stroke="${line}"/><rect x="140" y="110" width="10" height="28" rx="5" fill="var(--skin2)" stroke="${line}"/><rect x="130" y="114" width="10" height="24" rx="5" fill="var(--skin2)" stroke="${line}"/></g>
+      ${faceTools(anim)}${anim && anim.startsWith('gs') ? gsOverlay(anim) : ''}
     </g></svg>`;
 }
-
 const Face = {
-  sub: 'workouts', month: today().slice(0, 7), ed: null, P: null,
+  sub: 'workouts', month: today().slice(0, 7), ed: null, P: null, q: '', cat: 'Alle', rq: '',
   data() { const d = Store.get('face', {}); return { custom: d.custom || [], routines: d.routines || clone(FACE_DEF_ROUTINES) }; },
   save(fn) { const d = clone(this.data()); fn(d); Store.set('face', d); App.render(); },
-  all() { return [...FACE_LIB, ...this.data().custom]; },
+  all() { return [...FACE_LIB, ...this.data().custom.map(c => ({ cat: 'Eigene', ...c }))]; },
+  find(q, cat) {
+    q = (q || '').toLowerCase().trim();
+    return this.all().filter(e => (!cat || cat === 'Alle' || e.cat === cat) && (!q || (e.name + ' ' + (e.cat || '') + ' ' + (FACE_ANIMS[e.anim] || '') + ' ' + (e.desc || '')).toLowerCase().includes(q)));
+  },
   ex(id) { return this.all().find(e => e.id === id); },
   log(k) { return Store.get('fl:' + k, { list: [] }).list || []; },
   streak() {
@@ -97,9 +158,13 @@ function faceWorkouts() {
     <button class="card" data-a="faEdit" data-v="" style="min-height:160px;border-style:dashed;display:grid;place-content:center;justify-items:center;gap:4px">${ic('plus')}<b>Neues Gesichts-Workout</b><span class="small">Stell deine eigenen Übungen zusammen</span></button></div>`;
 }
 function faceLibrary() {
-  const custom = Face.data().custom.map(e => e.id);
-  return `<div class="faces">${Face.all().map(e => `<button class="facecard" data-a="faDetail" data-v="${e.id}">${faceSVG(e.anim)}<span>${esc(e.name)}</span><span class="small">${e.sec} Sek${custom.includes(e.id) ? ' · eigene' : ''}</span></button>`).join('')}
-    <button class="facecard" data-a="faCustom" data-v="" style="border-style:dashed;place-content:center;min-height:180px">${ic('plus')}<span>Eigene Übung</span></button></div>`;
+  const custom = Face.data().custom.map(e => e.id), list = Face.find(Face.q, Face.cat);
+  const cats = [...FACE_CATS, ...(custom.length ? ['Eigene'] : [])];
+  return `<div class="stack" style="margin-bottom:12px"><input id="faq" data-i="faQ" type="search" placeholder="Suchen: Gua Sha, Kiefer, Augen, Stirn …" value="${esc(Face.q)}" autocomplete="off">
+    <div class="chips">${cats.map(c => `<button class="chip" data-a="faCat" data-v="${c}" aria-pressed="${Face.cat === c}">${c}</button>`).join('')}</div></div>
+    <div class="faces">${list.map(e => `<button class="facecard" data-a="faDetail" data-v="${e.id}">${faceSVG(e.anim)}<span>${esc(e.name)}</span><span class="small">${esc(e.cat || '')} · ${e.sec} Sek</span></button>`).join('')}
+    <button class="facecard" data-a="faCustom" data-v="" style="border-style:dashed;place-content:center;min-height:180px">${ic('plus')}<span>Eigene Übung</span></button></div>
+    ${list.length ? '' : '<p class="empty">Nichts gefunden – probier ein anderes Wort oder leg eine eigene Übung an.</p>'}`;
 }
 function faceHistory() {
   const k = Face.month, list = Face.log(k).slice().sort((a, b) => b.t - a.t), days = new Set(list.map(x => x.date));
@@ -123,10 +188,14 @@ function routineModal() {
       <span style="display:grid"><button class="x" data-a="faMove" data-v="${i}|-1" aria-label="Nach oben" ${i ? '' : 'disabled'}>${ic('up')}</button><button class="x" data-a="faMove" data-v="${i}|1" aria-label="Nach unten" ${i < r.items.length - 1 ? '' : 'disabled'}>${ic('down')}</button></span>
       <button class="x" data-a="faRemove" data-v="${i}" aria-label="Entfernen">${ic('x')}</button></div>` : ''; }).join('') || '<p class="empty">Füge unten Übungen hinzu.</p>'}</div>
     <h3 style="margin:16px 0 8px">Übung hinzufügen</h3>
-    <div class="anim-pick">${Face.all().map(e => `<button data-a="faAddItem" data-v="${e.id}">${faceSVG(e.anim)}<span>${esc(e.name)}</span></button>`).join('')}</div>
+    <input id="rq" data-i="faRQ" type="search" placeholder="Suchen: Massage, Gua Sha, Augen …" value="${esc(Face.rq)}" autocomplete="off" style="margin-bottom:8px">
+    <div class="anim-pick">${Face.find(Face.rq).map(e => `<button data-a="faAddItem" data-v="${e.id}">${faceSVG(e.anim)}<span>${esc(e.name)}</span></button>`).join('') || '<p class="empty">Nichts gefunden.</p>'}</div>
     <div class="row" style="margin-top:16px">${r.isNew ? '' : `<button class="danger" data-a="faDelRoutine">${ic('trash')} Löschen</button>`}<button class="pri grow" data-a="faSaveRoutine">Speichern</button></div>`;
 }
 Actions.faSub = el => { Face.sub = el.dataset.v; App.render(); };
+Changes.faQ = el => { Face.q = el.value; App.render(); };
+Changes.faRQ = el => { Face.rq = el.value; App.refreshModal(); };
+Actions.faCat = el => { Face.cat = el.dataset.v; App.render(); };
 Actions.faMonth = el => { Face.month = addMonth(Face.month, +el.dataset.v); App.render(); };
 Actions.faEdit = el => {
   const r = Face.data().routines.find(x => x.id === el.dataset.v);

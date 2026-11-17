@@ -49,7 +49,7 @@ const ICONS = {
   sync: '<path d="M20 11a8 8 0 0 0-14.3-4.5L4 8M4 13a8 8 0 0 0 14.3 4.5L20 16"/><path d="M4 4v4h4M20 20v-4h-4"/>'
 };
 const ic = (k, cls = 'i') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k] || ''}</svg>`;
-const LOGO = '<svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" fill="#f7b6d2"/><path d="M20 30s-9-5.6-9-12a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6.4-9 12-9 12z" fill="#d6518e"/></svg>';
+const LOGO = '<svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#0b1115"/><circle cx="20" cy="18" r="10.5" fill="#ebe6d8"/><circle cx="24" cy="15.3" r="9.6" fill="#0b1115"/><path d="M15.6 23.2c0-2.3 1.9-4.8 1.9-4.8s1.9 2.5 1.9 4.8a1.9 1.9 0 0 1-3.8 0z" fill="#c62a43"/></svg>';
 
 /* ===== Lokaler Speicher (jede Seite = ein "Dokument" mit Zeitstempel) ===== */
 const Store = {
@@ -68,7 +68,7 @@ const Store = {
 
 /* ===== Sync über Supabase ===== */
 const Sync = {
-  client: null, user: null, state: 'off', msg: '', busy: false, timer: null,
+  client: null, user: null, state: 'init', msg: '', recovery: false, busy: false, timer: null,
   dirty: new Set(JSON.parse(localStorage.getItem('mw-dirty') || '[]')),
   cfg() {
     const c = window.MW_CONFIG || {};
@@ -78,18 +78,36 @@ const Sync = {
   mark(k) { this.dirty.add(k); this.saveDirty(); clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 800); },
   async init() {
     const c = this.cfg();
-    if (!c.url || !c.key || !window.supabase) { this.state = 'off'; App.renderStatus(); return; }
+    if (!c.url || !c.key) { this.state = 'off'; App.render(); return; }
+    if (!window.supabase) { this.state = 'err'; this.msg = 'Keine Verbindung zum Server. Bist du online?'; App.render(); return; }
     try {
-      this.client = window.supabase.createClient(c.url, c.key, { auth: { persistSession: true, autoRefreshToken: true } });
+      this.client = window.supabase.createClient(c.url, c.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
       const { data } = await this.client.auth.getSession();
       this.user = data.session ? data.session.user : null;
-      this.client.auth.onAuthStateChange((_e, s) => {
+      this.client.auth.onAuthStateChange((ev, s) => {
+        if (ev === 'PASSWORD_RECOVERY') this.recovery = true;
         const was = this.user && this.user.id; this.user = s ? s.user : null;
-        if (this.user && this.user.id !== was) this.pull(true);
-        if (!this.user) { this.state = 'login'; App.render(); }
+        if (this.user && this.user.id !== was) setTimeout(() => this.onUser(this.user), 0);
+        if (!this.user) this.state = 'login';
+        App.render();
       });
-      if (this.user) await this.pull(true); else { this.state = 'login'; App.renderStatus(); }
-    } catch (e) { this.state = 'err'; this.msg = e.message; App.renderStatus(); }
+      if (this.user) await this.onUser(this.user); else { this.state = 'login'; App.render(); }
+    } catch (e) { this.state = 'err'; this.msg = e.message; App.render(); }
+  },
+  // Login-Pflicht, sobald ein Server eingerichtet ist
+  gate() { const c = this.cfg(); return !!(c.url && c.key) && (!this.user || this.recovery); },
+  async onUser(u) {
+    const prev = localStorage.getItem('mw-owner');
+    if (prev && prev !== u.id) this.wipe();
+    localStorage.setItem('mw-owner', u.id);
+    App.render();
+    await this.pull();
+    App.applyTheme(); App.render();
+  },
+  wipe() {
+    Store.keys().forEach(k => localStorage.removeItem(Store.P + k));
+    Object.keys(localStorage).filter(k => k.startsWith('mw-pulled-') || k === 'mw-dirty' || k === 'mw-active').forEach(k => localStorage.removeItem(k));
+    this.dirty = new Set();
   },
   async pull(full) {
     if (!this.user || !this.client) return;
@@ -138,25 +156,39 @@ const Sync = {
     this.busy = false; App.renderStatus();
   },
   async signIn(email, pw, create) {
-    if (!this.client) await this.init();
-    if (!this.client) throw new Error('Supabase ist noch nicht eingerichtet.');
-    const fn = create ? this.client.auth.signUp({ email, password: pw }) : this.client.auth.signInWithPassword({ email, password: pw });
+    if (!this.client) throw new Error('Der Server ist noch nicht eingerichtet.');
+    const redirect = location.origin + location.pathname;
+    const fn = create ? this.client.auth.signUp({ email, password: pw, options: { emailRedirectTo: redirect } }) : this.client.auth.signInWithPassword({ email, password: pw });
     const { data, error } = await fn;
     if (error) throw error;
     if (create && !data.session) return 'confirm';
     return 'ok';
   },
-  async signOut() { if (this.client) await this.client.auth.signOut(); this.user = null; this.state = 'login'; },
+  async resetPw(email) {
+    const { error } = await this.client.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    if (error) throw error;
+  },
+  async updatePw(pw) {
+    const { error } = await this.client.auth.updateUser({ password: pw });
+    if (error) throw error;
+    this.recovery = false;
+  },
+  async signOut() {
+    try { await this.flush(); } catch (e) {}
+    if (this.client) await this.client.auth.signOut();
+    this.user = null; this.state = 'login'; this.wipe(); localStorage.removeItem('mw-owner');
+    App.applyTheme(); App.render();
+  },
   label() {
-    return ({ off: ['', 'Nur auf diesem Gerät gespeichert'], login: ['', 'Sync bereit – bitte anmelden'], busy: ['', 'Synchronisiere …'], ok: ['ok', 'Synchronisiert'], err: ['err', 'Sync-Fehler – tippe für Details'] })[this.state];
+    return ({ init: ['', 'Verbinde …'], off: ['', 'Nur auf diesem Gerät gespeichert'], login: ['', 'Sync bereit – bitte anmelden'], busy: ['', 'Synchronisiere …'], ok: ['ok', 'Synchronisiert'], err: ['err', 'Sync-Fehler – tippe für Details'] })[this.state];
   }
 };
 
 /* ===== Einstellungen ===== */
-const DEFAULTS = { goals: { kcal: 2000, p: 150, c: 200, f: 50 }, water: 8, theme: 'auto', routine: ['Gesichtspflege morgens', 'Lernen', 'Zimmer aufräumen'] };
+const DEFAULTS = { goals: { kcal: 2000, p: 150, c: 200, f: 50 }, water: 8, theme: 'dark', routine: ['Gesichtspflege morgens', 'Lernen', 'Zimmer aufräumen'] };
 const Settings = {
   get() { const s = Store.get('settings', {}); return { ...DEFAULTS, ...s, goals: { ...DEFAULTS.goals, ...(s.goals || {}) } }; },
-  update(fn) { const s = clone(this.get()); fn(s); Store.set('settings', s); App.applyTheme(); App.render(); }
+  update(fn) { const s = clone(this.get()); fn(s); Store.set('settings', s); App.applyTheme(); if (window.FX) FX.apply(); App.render(); }
 };
 
 /* ===== App-Kern ===== */
@@ -173,11 +205,19 @@ const App = {
     setInterval(() => { if (!document.hidden) Sync.pull(false); }, 90000);
   },
   go(tab) { this.tab = tab; history.replaceState(null, '', '#' + tab); this.render(); scrollTo(0, 0); },
-  applyTheme() { const t = Settings.get().theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; },
+  applyTheme() { const t = Settings.get().theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = getComputedStyle(document.documentElement).colorScheme === 'light' ? '#d3d6d2' : '#06080b'; },
   render() {
     const a = document.activeElement;
     const keep = a && a.id && $('#main').contains(a) ? { id: a.id, v: a.value, s: a.selectionStart } : null;
-    $('#nav').innerHTML = `<div class="brand">${LOGO}<span>Mein Weg</span></div>` +
+    if (Sync.gate()) {
+      document.body.classList.add('auth'); $('#nav').innerHTML = '';
+      if (!$('#modal').hidden) this.closeModal();
+      $('#main').innerHTML = Auth.render();
+      if (keep) { const el = document.getElementById(keep.id); if (el && 'value' in el) { el.value = keep.v; el.focus(); } }
+      return;
+    }
+    document.body.classList.remove('auth');
+    $('#nav').innerHTML = `<div class="brand">${LOGO}<span>The Lore</span></div>` +
       TABS.map(([k, l]) => `<button data-a="go" data-v="${k}" ${k === this.tab ? 'aria-current="page"' : ''}><span class="ni">${ic(k)}</span><span>${l}</span></button>`).join('') +
       `<div class="navset"><button data-a="go" data-v="einstellungen" ${this.tab === 'einstellungen' ? 'aria-current="page"' : ''}><span class="ni">${ic('set')}</span><span>Einstellungen</span></button><p class="status" id="syncst" style="padding:8px"></p></div>`;
     const v = Views[this.tab] || Views.heute;

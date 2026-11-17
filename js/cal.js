@@ -1,6 +1,6 @@
 'use strict';
 /* ===== Kalender im Stil von Google Kalender: Tag / Woche / Monat ===== */
-const CATS = [['termin', 'Termin', '#9cc8f5'], ['test', 'Test / Prüfung', '#f7a58f'], ['wichtig', 'Wichtig', '#f7b6d2'], ['schule', 'Schule / Arbeit', '#f9d27a'], ['sport', 'Sport', '#8fd9cf'], ['privat', 'Privat', '#c7a4f0']];
+const CATS = [['termin', 'Termin', '#3e5f86'], ['test', 'Test / Prüfung', '#a3243a'], ['wichtig', 'Wichtig', '#7a2d6e'], ['schule', 'Schule / Arbeit', '#8a6a1c'], ['sport', 'Sport', '#2f6b5a'], ['privat', 'Privat', '#54458a']];
 const HOUR = 48;
 const toMin = t => { const [h, m] = (t || '0:0').split(':').map(Number); return h * 60 + (m || 0); };
 const toTime = m => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
