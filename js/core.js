@@ -43,6 +43,8 @@ const ICONS = {
   drop: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
   body: '<circle cx="12" cy="4.5" r="2"/><path d="M6 8.5h12M12 8.5v6M12 14.5l-3 6.5M12 14.5l3 6.5"/>',
   list: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  journal: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6M9 11h4"/>',
+  scale: '<path d="M5 7h14l-2 12H7z"/><path d="M9 7a3 3 0 0 1 6 0M12 11v3"/>',
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
   history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
   camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
@@ -195,7 +197,7 @@ const Settings = {
 
 /* ===== App-Kern ===== */
 const Views = {}, Actions = {}, Forms = {}, Changes = {};
-const TABS = [['heute', 'Heute'], ['essen', 'Essen'], ['training', 'Training'], ['gesicht', 'Gesicht'], ['kalender', 'Kalender']];
+const TABS = [['heute', 'Heute'], ['essen', 'Essen'], ['training', 'Training'], ['gesicht', 'Gesicht'], ['journal', 'Journal'], ['kalender', 'Kalender']];
 const App = {
   tab: 'heute', date: today(), modalRender: null,
   start() {
@@ -203,7 +205,7 @@ const App = {
     if (Views[h]) this.tab = h;
     this.applyTheme(); this.render(); Sync.init();
     addEventListener('hashchange', () => { const t = location.hash.slice(1); if (Views[t] && t !== this.tab) { this.tab = t; this.render(); } });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (this.date !== today() && this._lastToday !== today()) { this._lastToday = today(); } Sync.pull(false); } });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && typeof Journal !== 'undefined' && Journal.pinSet()) Journal.unlocked = false; if (!document.hidden) { if (this.date !== today() && this._lastToday !== today()) { this._lastToday = today(); } Sync.pull(false); } });
     setInterval(() => { if (!document.hidden) Sync.pull(false); }, 90000);
   },
   go(tab) { this.tab = tab; history.replaceState(null, '', '#' + tab); this.render(); scrollTo(0, 0); },

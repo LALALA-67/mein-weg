@@ -64,7 +64,7 @@ Views.essen = {
     <div class="cards" style="margin-top:14px">${MEALS.map(([m, l]) => {
       const items = d.meals[m], kc = items.reduce((a, i) => a + (+i.kcal || 0), 0);
       return `<section class="card meal"><div class="meal-h"><h3>${l}</h3><span class="kc">${num(kc)} kcal</span><button class="icon pink" data-a="foodAdd" data-v="${m}" aria-label="${l} hinzufügen">${ic('plus')}</button></div>
-        ${items.length ? `<ul class="list">${items.map(i => Food.itemRow(i, m)).join('')}</ul>` : ''}
+        ${items.length ? `<ul class="list">${items.map(i => Food.itemRow(i, m)).join('')}</ul>` : (() => { const y = Day.get(addDays(App.date, -1)).meals[m]; return y.length ? `<div style="padding:0 16px 10px"><button class="ghost" style="padding:4px 0;min-height:32px" data-a="foodCopy" data-v="${m}">${ic('history')} Wie gestern übernehmen (${y.length} · ${num(y.reduce((a, i) => a + (+i.kcal || 0), 0))} kcal)</button></div>` : ''; })()}
         <div style="padding:0 16px 14px" class="row"><button class="grow" data-a="foodAdd" data-v="${m}" data-mode="scan">${ic('scan')} Scannen</button><button class="grow" data-a="foodAdd" data-v="${m}" data-mode="search">${ic('search')} Suchen</button></div></section>`;
     }).join('')}</div>
     <p class="small" style="margin-top:14px">Produktdaten von <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener" style="color:inherit">Open Food Facts</a> (freie Datenbank, Werte können fehlen oder abweichen).</p>`;
@@ -238,3 +238,5 @@ Changes.foodPhoto = async el => {
     lookupCode(code);
   } catch (e) { Food.st.err = 'Auf dem Foto wurde kein Barcode erkannt. Versuch es näher und scharf.'; refreshFood(); }
 };
+
+Actions.foodCopy = el => { const m = el.dataset.v, y = Day.get(addDays(App.date, -1)).meals[m]; Day.update(d => { d.meals[m] = [...d.meals[m], ...y.map(i => ({ ...clone(i), id: uid() }))]; }); App.toast('Von gestern übernommen'); };

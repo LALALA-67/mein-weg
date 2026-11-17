@@ -23,6 +23,7 @@ Views.heute = {
         <section class="card"><h2>Bewegung & Pflege</h2><ul class="list">
           <li><span class="t"><b>Training</b><small>${wk.length ? wk.map(w => esc(w.name) + ' · ' + fmtDur(w.dur)).join(', ') : 'Noch kein Workout'}</small></span><button data-a="go" data-v="training">${wk.length ? ic('check') : 'Los'}</button></li>
           <li><span class="t"><b>Gesichts-Workout</b><small>${fl.length ? fl.map(x => esc(x.name)).join(', ') : 'Noch nicht gemacht'}</small></span><button data-a="go" data-v="gesicht">${fl.length ? ic('check') : 'Los'}</button></li></ul></section>
+        ${weightCard()}
       </div>
       <div class="col">
         <section class="card"><div class="row between"><h2 style="margin:0">${isToday ? 'Heute' : 'Termine'} im Kalender</h2><button class="icon pink" data-a="todayEvent" aria-label="Termin hinzufügen">${ic('plus')}</button></div>
@@ -39,6 +40,22 @@ Views.heute = {
     <p class="status syncst hide-d" style="margin-top:14px" data-a="syncInfo"></p>`;
   }
 };
+function weightCard() {
+  const l = (Store.get('weight', { list: [] }).list || []).slice().sort((a, b) => a.d.localeCompare(b.d)), last = l[l.length - 1], prev = l[l.length - 2];
+  const recent = l.slice(-30), goal = +Settings.get().goalWeight || 0;
+  let chart = '';
+  if (recent.length > 1) {
+    const vs = recent.map(x => x.kg), lo = Math.min(...vs, goal || Infinity) - .5, hi = Math.max(...vs, goal || -Infinity) + .5, W = 300, H = 80;
+    const x = i => 6 + i * (W - 12) / (recent.length - 1), y = v => H - 6 - (v - lo) / (hi - lo) * (H - 12);
+    chart = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;margin-top:8px">${goal ? `<line x1="0" x2="${W}" y1="${y(goal).toFixed(1)}" y2="${y(goal).toFixed(1)}" stroke="var(--mute)" stroke-dasharray="4 4"/><text x="${W - 4}" y="${(y(goal) - 3).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--mute)">Ziel ${num(goal, 1)}</text>` : ''}
+      <path d="${recent.map((r, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(r.kg).toFixed(1)}`).join(' ')}" fill="none" stroke="var(--acc)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>${recent.map((r, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(r.kg).toFixed(1)}" r="2.6" fill="var(--acc)"/>`).join('')}</svg>`;
+  }
+  const diff = last && prev ? last.kg - prev.kg : 0;
+  return `<section class="card"><div class="row between"><h2 style="margin:0">Körpergewicht</h2>${last ? `<span class="num" style="font-weight:700">${num(last.kg, 1)} kg ${prev ? `<span class="small">${diff > 0 ? '+' : ''}${num(diff, 1)}</span>` : ''}</span>` : ''}</div>
+    ${chart}<form data-f="weight" class="row" style="margin-top:10px"><input id="wkg" name="kg" type="number" inputmode="decimal" step="0.1" min="20" max="400" placeholder="${last ? num(last.kg, 1) : 'z. B. 62,5'} kg" required><button class="pri">Eintragen</button></form>
+    <p class="small" style="margin-top:6px">${l.length ? `${l.length} Einträge · gilt für ${relDay(App.date) || fmtDate(App.date)}` : 'Trag am besten morgens nach dem Aufstehen ein – dann sind die Werte vergleichbar.'}</p></section>`;
+}
+Forms.weight = v => { const kg = Math.round(parseFloat(String(v.kg).replace(',', '.')) * 10) / 10; if (!(kg > 20 && kg < 400)) return; const l = (Store.get('weight', { list: [] }).list || []).filter(x => x.d !== App.date); l.push({ d: App.date, kg }); Store.set('weight', { list: l }); App.render(); App.toast('Gewicht gespeichert'); };
 function upcomingTests() {
   const t = today(), l = Cal.events().filter(e => e.cat === 'test' && e.date > App.date && e.date >= t).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
   if (!l.length) return '';
@@ -74,16 +91,36 @@ Views.einstellungen = {
         <label>Protein (g)<input name="p" type="number" inputmode="numeric" min="0" value="${s.goals.p}"></label>
         <label>Kohlenhydrate (g)<input name="c" type="number" inputmode="numeric" min="0" value="${s.goals.c}"></label>
         <label>Fett (g)<input name="f" type="number" inputmode="numeric" min="0" value="${s.goals.f}"></label>
-        <label>Wasser (Gläser à 250 ml)<input name="water" type="number" inputmode="numeric" min="1" max="20" value="${s.water}"></label></div>
+        <label>Wasser (Gläser à 250 ml)<input name="water" type="number" inputmode="numeric" min="1" max="20" value="${s.water}"></label>
+        <label>Zielgewicht (kg, optional)<input name="goalWeight" type="number" inputmode="decimal" step="0.1" value="${s.goalWeight || ''}"></label></div>
         <p class="small">Deine Makros ergeben ${num(s.goals.p * 4 + s.goals.c * 4 + s.goals.f * 9)} kcal (Protein & Kohlenhydrate 4 kcal/g, Fett 9 kcal/g).</p>
         <button class="pri">Ziele speichern</button></form></section></div>
       <div class="col"><section class="card"><div class="row between"><h2 style="margin:0">Konto & Sync</h2><span class="status"><span class="dot ${dc}"></span>${dl}</span></div><div style="margin-top:12px">${sync}</div></section>
+      <section class="card"><h2>Journal-PIN</h2>${Journal.pinSet() ? '<p class="small" style="margin-bottom:10px">Dein Journal ist auf diesem Gerät mit einer PIN geschützt.</p><button style="width:100%" data-a="jPinOff">PIN entfernen</button>'
+        : '<p class="small" style="margin-bottom:10px">Schütze dein Journal auf diesem Gerät zusätzlich mit einer PIN (4–8 Ziffern).</p><form data-f="jPin" class="row"><input id="jpinset" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" placeholder="Neue PIN" required autocomplete="off"><button class="pri">Setzen</button></form>'}</section>
+      <section class="card"><h2>Server-Sicherungen</h2><p class="small" style="margin-bottom:10px">Jede Nacht wird automatisch eine Kopie all deiner Daten auf dem Server gespeichert (14 Tage lang). Falls mal etwas verloren geht, kannst du einen Stand zurückholen.</p>
+        ${Backups.list ? (Backups.list.length ? `<ul class="list">${Backups.list.map(b => `<li><span class="t"><b>${fmtDate(b.day)}</b><small>${b.n} Einträge</small></span><button data-a="bkRestore" data-v="${b.day}">Zurückholen</button></li>`).join('')}</ul>` : '<p class="small">Noch keine Sicherung vorhanden – die erste entsteht heute Nacht.</p>') : `<button style="width:100%" data-a="bkLoad" ${Sync.user ? '' : 'disabled'}>Sicherungen anzeigen</button>`}</section>
       <section class="card"><h2>Backup</h2><p class="small" style="margin-bottom:10px">Sichere alle Daten als Datei oder spiele ein Backup wieder ein.</p>
         <div class="row"><button class="grow" data-a="exportData">Backup herunterladen</button><label class="grow" style="display:block"><span class="sr" style="display:none">Backup laden</span><input type="file" accept="application/json,.json" data-c="importData" hidden><span style="display:flex;justify-content:center;align-items:center;min-height:44px;border-radius:14px;background:var(--card2);color:var(--ink);font-weight:800;cursor:pointer">Backup laden</span></label></div></section>
       <section class="card"><h2>Über die App</h2><p class="small">Produktdaten: Open Food Facts (ODbL). Übungen & Bilder: Free Exercise DB (Public Domain). Gesichts-Animationen: selbst gezeichnet.</p></section></div></div>`;
   }
 };
 Actions.theme = el => Settings.update(s => s.theme = el.dataset.v);
+Forms.jPin = async v => { if (!/^\d{4,8}$/.test(v.pin || '')) { App.toast('4–8 Ziffern'); return; } localStorage.setItem('mw-jpin', await Journal.hash(v.pin)); Journal.unlocked = true; App.render(); App.toast('PIN gesetzt'); };
+Actions.jPinOff = () => App.confirm('PIN für das Journal auf diesem Gerät entfernen?', () => { localStorage.removeItem('mw-jpin'); App.render(); }, 'Entfernen');
+const Backups = { list: null };
+Actions.bkLoad = async () => {
+  const { data, error } = await Sync.client.from('kv_backup').select('day').order('day', { ascending: false }).limit(5000);
+  if (error) { App.toast('Konnte Sicherungen nicht laden: ' + error.message); return; }
+  const c = {}; (data || []).forEach(r => c[r.day] = (c[r.day] || 0) + 1);
+  Backups.list = Object.entries(c).map(([day, n]) => ({ day, n })); App.render();
+};
+Actions.bkRestore = el => { const day = el.dataset.v; App.confirm(`Stand vom ${fmtDate(day)} zurückholen? Neuere Änderungen an denselben Bereichen werden überschrieben.`, async () => {
+  const { data, error } = await Sync.client.from('kv_backup').select('key,data').eq('day', day);
+  if (error) { App.toast('Fehler: ' + error.message); return; }
+  (data || []).forEach(r => { Store.put(r.key, r.data, Date.now()); Sync.mark(r.key); });
+  App.applyTheme(); App.render(); App.toast(`${(data || []).length} Bereiche wiederhergestellt`);
+}, 'Zurückholen'); };
 Actions.rainToggle = () => Settings.update(s => s.rain = !FX.on);
 let installEvt = null;
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (App.tab === 'einstellungen') App.render(); });
@@ -97,7 +134,7 @@ function installBox() {
   return '<p class="small">Laptop (Chrome/Edge): Klick rechts in der Adressleiste auf das Symbol <b>„App installieren“</b> (Bildschirm mit Pfeil) oder im Menü ⋮ auf <b>„The Lore installieren“</b>.<br>Android (Chrome): Menü ⋮ → <b>„App installieren“</b>.</p>';
 }
 Actions.install = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; App.render(); };
-Forms.goals = v => { Settings.update(s => { s.goals = { kcal: +v.kcal || 2000, p: +v.p || 0, c: +v.c || 0, f: +v.f || 0 }; s.water = Math.max(1, +v.water || 8); }); App.toast('Ziele gespeichert'); };
+Forms.goals = v => { Settings.update(s => { s.goals = { kcal: +v.kcal || 2000, p: +v.p || 0, c: +v.c || 0, f: +v.f || 0 }; s.water = Math.max(1, +v.water || 8); s.goalWeight = parseFloat(String(v.goalWeight || '').replace(',', '.')) || 0; }); App.toast('Ziele gespeichert'); };
 Actions.syncNow = () => Sync.pull(false);
 Actions.syncOut = () => App.confirm('Abmelden? Deine Daten bleiben sicher in deinem Konto gespeichert.', () => Sync.signOut(), 'Abmelden');
 Actions.exportData = () => {

@@ -23,8 +23,14 @@ const Train = {
   folders() { return Store.get('folders', { list: [] }).list || []; },
   saveFolders(l) { Store.set('folders', { list: l }); App.render(); },
   wk(k) { return Store.get('wk:' + k, { list: [] }).list || []; },
-  active() { try { return JSON.parse(localStorage.getItem('mw-active')); } catch (e) { return null; } },
-  setActive(a) { if (a) localStorage.setItem('mw-active', JSON.stringify(a)); else localStorage.removeItem('mw-active'); },
+  active() { return Store.get('active-workout', null) || null; },
+  setActive(a) { Store.set('active-workout', a || null); },
+  rest: null,
+  best(id, beforeTs) { // bestes Gewicht und geschätztes 1RM aus den letzten 12 Monaten
+    let kg = 0, rm = 0;
+    for (let i = 0; i < 12; i++) this.wk(addMonth(today().slice(0, 7), -i)).forEach(w => { if (beforeTs && w.start >= beforeTs) return; w.ex.forEach(x => { if (x.id !== id) return; x.sets.forEach(s => { kg = Math.max(kg, +s.kg || 0); rm = Math.max(rm, (+s.kg || 0) * (1 + (+s.r || 0) / 30)); }); }); });
+    return { kg, rm };
+  },
   name(id) { const e = this.byId[id]; return e ? e.n : id.replace(/_/g, ' '); },
   anim(id, cls = '') {
     const e = this.byId[id], u = EX_IMG + encodeURIComponent(id) + '/';
@@ -144,6 +150,8 @@ function bodyView() {
 /* --- Live-Workout --- */
 function liveView(a) {
   return `<div class="live row between"><div><h1 style="font-size:24px">${esc(a.name)}</h1><span class="sub" id="livet">${fmtDur((Date.now() - a.start) / 1000)}</span></div><button class="pri" data-a="trFinish">Beenden</button></div>
+    ${Train.rest ? `<div class="card restcard"><div class="row between"><span><b>Pause</b> <span class="big" id="restt" style="font-size:28px">–</span></span><span class="row"><button data-a="restAdd">+15 s</button><button data-a="restSkip">Weiter</button></span></div><div class="bar" style="margin-top:8px"><i id="restbar" style="width:100%;background:var(--acc)"></i></div></div>` : ''}
+    <div class="chips" style="margin:6px 0"><span class="small" style="align-self:center">Pause nach jedem Satz:</span>${[60, 90, 120, 180].map(v => `<button class="chip" data-a="restSet" data-v="${v}" aria-pressed="${+(Settings.get().rest || 90) === v}">${v < 120 ? v + ' s' : v / 60 + ' Min'}</button>`).join('')}</div>
     <div class="stack" style="margin-top:6px">${a.ex.map((x, ei) => {
       const last = Train.lastFor(x.id);
       return `<section class="card"><div class="row" style="margin-bottom:8px"><span data-a="trDetail" data-v="${esc(x.id)}" style="cursor:pointer">${Train.anim(x.id, 'sm')}</span><div class="grow"><h3>${esc(Train.name(x.id))}</h3><span class="small">${last ? 'Letztes Mal: ' + last.map(s => `${num(s.r)}×${num(s.kg, 1)}kg`).join(', ') : esc(Train.muscles(Train.byId[x.id]))}</span></div><button class="x" data-a="trLiveRemove" data-v="${ei}" aria-label="Übung entfernen">${ic('trash')}</button></div>
@@ -223,7 +231,21 @@ Actions.trStart = el => {
   Train.sub = 'live'; App.go('training');
 };
 Changes.trSet = el => { const [ei, si, k] = el.dataset.v.split('|'); const a = Train.active(); if (!a) return; a.ex[+ei].sets[+si][k] = el.value === '' ? '' : +el.value; Train.setActive(a); };
-Actions.trSetOk = el => { const [ei, si] = el.dataset.v.split('|').map(Number); const a = Train.active(); const s = a.ex[ei].sets[si]; s.ok = !s.ok; Train.setActive(a); if (s.ok && navigator.vibrate) navigator.vibrate(40); App.render(); };
+Actions.trSetOk = el => { const [ei, si] = el.dataset.v.split('|').map(Number); const a = Train.active(); const s = a.ex[ei].sets[si]; s.ok = !s.ok; Train.setActive(a); if (s.ok) { if (navigator.vibrate) navigator.vibrate(40); startRest(); } App.render(); };
+function startRest() { const sec = +(Settings.get().rest || 90); Train.rest = { end: Date.now() + sec * 1000, total: sec }; }
+Actions.restAdd = () => { if (Train.rest) { Train.rest.end += 15000; Train.rest.total += 15; } };
+Actions.restSkip = () => { Train.rest = null; App.render(); };
+Actions.restSet = el => Settings.update(s => s.rest = +el.dataset.v);
+setInterval(() => {
+  const r = Train.rest; if (!r) return;
+  const left = Math.ceil((r.end - Date.now()) / 1000), el = $('#restt'), bar = $('#restbar');
+  if (left <= 0) {
+    Train.rest = null; if (navigator.vibrate) navigator.vibrate([200, 100, 200]); App.toast('Pause vorbei – nächster Satz!');
+    if ('Notification' in window && Notification.permission === 'granted' && document.hidden) navigator.serviceWorker.ready.then(g => g.showNotification('The Lore', { body: 'Pause vorbei – nächster Satz!', icon: 'icon-192.png', tag: 'rest' })).catch(() => {});
+    if (Train.sub === 'live') App.render(); return;
+  }
+  if (el) el.textContent = `${Math.floor(left / 60)}:${pad(left % 60)}`; if (bar) bar.style.width = (left / r.total * 100) + '%';
+}, 250);
 Actions.trAddSet = el => { const a = Train.active(), x = a.ex[+el.dataset.v], l = x.sets[x.sets.length - 1] || { r: 10, kg: '' }; x.sets.push({ r: l.r, kg: l.kg, ok: false }); Train.setActive(a); App.render(); };
 Actions.trDelSet = el => { const a = Train.active(); a.ex[+el.dataset.v].sets.pop(); Train.setActive(a); App.render(); };
 Actions.trLiveRemove = el => { const a = Train.active(); a.ex.splice(+el.dataset.v, 1); Train.setActive(a); App.render(); };
@@ -232,8 +254,10 @@ Actions.trFinish = () => {
   const a = Train.active(); if (!a) return;
   const ex = a.ex.map(x => ({ id: x.id, sets: x.sets.filter(s => s.ok).map(s => ({ r: +s.r || 0, kg: +s.kg || 0 })) })).filter(x => x.sets.length);
   if (!ex.length) { App.toast('Hake mindestens einen Satz ab (✓), um das Workout zu speichern.'); return; }
+  const pr = []; ex.forEach(x => { const b = Train.best(x.id), top = x.sets.reduce((m, s) => (s.kg * (1 + s.r / 30) > m.rm ? { rm: s.kg * (1 + s.r / 30), s } : m), { rm: 0, s: null }); if (top.s && top.s.kg > 0 && (b.rm === 0 || top.rm > b.rm + .01)) pr.push({ id: x.id, kg: top.s.kg, r: top.s.r, first: b.rm === 0 }); });
   const d = iso(new Date(a.start)), k = 'wk:' + d.slice(0, 7);
-  const list = Train.wk(d.slice(0, 7)); list.push({ id: uid(), date: d, start: a.start, dur: Math.round((Date.now() - a.start) / 1000), name: a.name, folderId: a.folderId, ex });
+  const list = Train.wk(d.slice(0, 7)); list.push({ id: uid(), date: d, start: a.start, dur: Math.round((Date.now() - a.start) / 1000), name: a.name, folderId: a.folderId, ex, pr });
+  Train.rest = null;
   const w = list[list.length - 1];
   Store.set(k, { list }); Train.setActive(null); Train.sub = 'verlauf'; Train.month = d.slice(0, 7);
   App.render(); workoutSummary(w, true);
@@ -246,6 +270,7 @@ function workoutSummary(w, fresh) {
     return `${App.sheetHead(fresh ? 'Workout geschafft!' : esc(w.name))}
       <p class="small">${esc(w.name)} · ${fmtDate(w.date)}</p>
       <div class="sumstats"><div><b>${fmtDur(w.dur).replace(' Min', '′').replace(' Std ', 'h ')}</b><span>Dauer</span></div><div><b>${sets}</b><span>Sätze</span></div><div><b>${num(vol)}</b><span>kg bewegt</span></div></div>
+      ${(w.pr || []).filter(p => !p.first).length ? `<div class="card hero" style="margin-bottom:12px"><b style="font-size:17px">Neue Rekorde!</b>${w.pr.filter(p => !p.first).map(p => `<div class="small" style="color:#f3e4dc;margin-top:4px">${esc(Train.name(p.id))}: <b>${num(p.kg, 1)} kg × ${p.r}</b></div>`).join('')}</div>` : ''}
       <div class="row between" style="margin-bottom:6px"><h3>Das hast du trainiert</h3>${Body.sexSwitch()}</div>
       <div class="sumbodies">
         <div class="card" style="padding:10px"><h3 style="text-align:center;margin-bottom:4px">Dieses Workout</h3>${Body.svg(c, null, { mini: true })}
