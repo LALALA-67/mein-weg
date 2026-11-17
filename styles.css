@@ -434,3 +434,25 @@ body{background:var(--bg)}
 .face.paused .gsar{animation-play-state:paused}
 .face .gsov,.face .gsov g{transform-origin:0 0;transform-box:view-box}
 .face.f-gsall .gsar{stroke-width:1.7}
+.sumbodies{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.sumbodies .bodysvg.mini{max-height:280px}
+/* ===== Realistischere Szene ===== */
+:root{--tree3:#7d8783}
+:root[data-theme=dark]{--tree3:#0f171c}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tree3:#0f171c}}
+.scene .f3{color:var(--tree3);height:44vh;bottom:9vh;filter:blur(1.4px);opacity:.85}
+.scene .f1{height:40vh;bottom:4vh;filter:blur(.6px)}
+.scene .f2{height:46vh;bottom:-1vh}
+.scene .fog.c{bottom:18vh;height:30vh;opacity:.9;animation-duration:120s}
+.scene .stars{position:absolute;inset:0 0 50% 0;background-image:radial-gradient(1px 1px at 12% 18%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 28% 8%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 44% 22%,rgba(255,255,255,.6),transparent),radial-gradient(1.5px 1.5px at 63% 12%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 78% 30%,rgba(255,255,255,.4),transparent),radial-gradient(1px 1px at 90% 6%,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 6% 34%,rgba(255,255,255,.4),transparent),radial-gradient(1px 1px at 52% 4%,rgba(255,255,255,.5),transparent);opacity:.7}
+:root[data-theme=light] .scene .stars{display:none}
+.scene .moon{filter:blur(.3px)}
+.scene .clouds{position:absolute;left:-30%;right:-30%;top:0;height:46vh;background:radial-gradient(ellipse 22% 9% at 30% 22%,rgba(120,130,140,.38),transparent 70%),radial-gradient(ellipse 30% 10% at 62% 14%,rgba(110,120,130,.32),transparent 70%),radial-gradient(ellipse 26% 8% at 85% 30%,rgba(100,110,120,.3),transparent 70%),radial-gradient(ellipse 18% 7% at 10% 40%,rgba(100,110,120,.28),transparent 70%);filter:blur(6px);animation:clouds 140s linear infinite}
+:root[data-theme=dark] .scene .clouds{background:radial-gradient(ellipse 22% 9% at 30% 22%,rgba(40,48,56,.75),transparent 70%),radial-gradient(ellipse 30% 10% at 62% 14%,rgba(34,42,50,.7),transparent 70%),radial-gradient(ellipse 26% 8% at 85% 30%,rgba(30,38,46,.7),transparent 70%),radial-gradient(ellipse 18% 7% at 10% 40%,rgba(30,38,46,.6),transparent 70%)}
+@keyframes clouds{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
+.scene .vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 50%,rgba(0,0,0,.55) 100%)}
+:root[data-theme=light] .scene .vignette{background:radial-gradient(ellipse at 50% 40%,transparent 55%,rgba(40,45,50,.25) 100%)}
+.scene .grain{position:absolute;inset:-50%;opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
+.catwrap{display:inline-flex;align-items:center;position:relative}
+.catdel{position:absolute;top:-6px;right:-6px;width:20px!important;height:20px;min-height:20px!important;padding:0!important;border-radius:50%!important;background:var(--card)!important;border:1px solid var(--line)!important;font-size:13px!important;line-height:1}
