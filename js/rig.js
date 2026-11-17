@@ -133,31 +133,57 @@ const Rig = {
 
   /* --- Zeichnen --- */
   draw(j, pat, ex, f) {
-    const W = this.W, hot = new Set(ex ? ex.pm : []), warm = new Set(ex ? ex.sm : []);
-    const C = { near: 'url(#rgN)', far: '#6f767d', line: '#15191c', hot: '#ff2a3d', warm: '#ff8a8f' };
-    const seg = (a, b, w, col) => `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${C.line}" stroke-width="${w + 2.4}" stroke-linecap="round"/><line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
-    const musc = (a, b, w, side, t0, t1, m, ant, op = 1) => {
-      const lvl = hot.has(m) ? 'hot' : warm.has(m) ? 'warm' : null; if (!lvl) return '';
-      let dx = b[0] - a[0], dy = b[1] - a[1]; const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
-      let nx = dy, ny = -dx; if (ant === 'torso') { nx = -dy; ny = dx; }
-      const off = side * w * .24, q1 = [a[0] + (b[0] - a[0]) * t0 + nx * off, a[1] + (b[1] - a[1]) * t0 + ny * off], q2 = [a[0] + (b[0] - a[0]) * t1 + nx * off, a[1] + (b[1] - a[1]) * t1 + ny * off];
-      return `<line class="mg ${lvl}" x1="${q1[0].toFixed(1)}" y1="${q1[1].toFixed(1)}" x2="${q2[0].toFixed(1)}" y2="${q2[1].toFixed(1)}" stroke="${C[lvl]}" stroke-width="${(w * (side ? .52 : .78)).toFixed(1)}" stroke-linecap="round" opacity="${op}"/>`;
+    const hot = new Set(ex ? ex.pm : []), warm = new Set(ex ? ex.sm : []);
+    const C = { near: 'url(#rgN)', far: 'url(#rgF2)', line: '#101316', hot: 'url(#rgHot)', warm: '#ff8d93' };
+    const F = v => v.toFixed(1);
+    const unit = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l, l]; };
+    const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    // Muskulöses Glied: breit am Ansatz, Muskelbauch, schmal am Ende
+    const limb = (a, b, o, col) => {
+      const [dx, dy] = unit(a, b), n = [dy, -dx]; // n = vorne
+      const m = lerp(a, b, o.t), P = (q, s) => [q[0] + n[0] * s, q[1] + n[1] * s];
+      const aA = P(a, o.w1 / 2), bA = P(b, o.w2 / 2), mA = P(m, o.ma), aP = P(a, -o.w1 / 2), bP = P(b, -o.w2 / 2), mP = P(m, -o.mp);
+      const cA = [2 * mA[0] - (aA[0] + bA[0]) / 2, 2 * mA[1] - (aA[1] + bA[1]) / 2], cP = [2 * mP[0] - (aP[0] + bP[0]) / 2, 2 * mP[1] - (aP[1] + bP[1]) / 2];
+      const d = `M${F(aA[0])} ${F(aA[1])} Q${F(cA[0])} ${F(cA[1])} ${F(bA[0])} ${F(bA[1])} L${F(bP[0])} ${F(bP[1])} Q${F(cP[0])} ${F(cP[1])} ${F(aP[0])} ${F(aP[1])}Z`;
+      return `<circle cx="${F(a[0])}" cy="${F(a[1])}" r="${F(o.w1 / 2 + 1.1)}" fill="${C.line}"/><circle cx="${F(b[0])}" cy="${F(b[1])}" r="${F(o.w2 / 2 + 1.1)}" fill="${C.line}"/><path d="${d}" fill="${col}" stroke="${C.line}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="${F(a[0])}" cy="${F(a[1])}" r="${F(o.w1 / 2)}" fill="${col}"/><circle cx="${F(b[0])}" cy="${F(b[1])}" r="${F(o.w2 / 2)}" fill="${col}"/>`;
     };
-    const limbArm = (A, col, op) => seg(j.sh, A.el, W.ua, col) + seg(A.el, A.wr, W.fa, col)
-      + musc(j.sh, A.el, W.ua, 1, .18, .82, 'biceps', 0, op) + musc(j.sh, A.el, W.ua, -1, .12, .85, 'triceps', 0, op) + musc(A.el, A.wr, W.fa, 0, .08, .62, 'forearms', 0, op)
-      + `<circle cx="${A.wr[0].toFixed(1)}" cy="${A.wr[1].toFixed(1)}" r="4.2" fill="${col}" stroke="${C.line}" stroke-width="1.2"/>`;
-    const limbLeg = (G, col, op) => seg(j.hip, G.k, W.th, col) + seg(G.k, G.an, W.sh, col) + seg(G.an, G.toe, W.ft, col)
-      + musc(j.hip, G.k, W.th, 1, .12, .86, 'quadriceps', 0, op) + musc(j.hip, G.k, W.th, -1, .16, .86, 'hamstrings', 0, op)
-      + musc(j.hip, G.k, W.th, 0, .2, .7, 'adductors', 0, op * .8) + musc(j.hip, G.k, W.th, 0, .04, .4, 'abductors', 0, op * .8)
-      + musc(G.k, G.an, W.sh, -1, .1, .56, 'calves', 0, op);
-    const torso = seg(j.hip, j.sh, W.torso, C.near) + `<circle cx="${j.hip[0].toFixed(1)}" cy="${j.hip[1].toFixed(1)}" r="12.5" fill="url(#rgN)" stroke="${C.line}" stroke-width="1.6"/>`
-      + musc(j.hip, j.sh, W.torso, 1, .6, .92, 'chest', 'torso') + musc(j.hip, j.sh, W.torso, 1, .1, .56, 'abdominals', 'torso')
-      + musc(j.hip, j.sh, W.torso, -1, .44, .86, 'lats', 'torso') + musc(j.hip, j.sh, W.torso, -1, .55, .86, 'middle back', 'torso')
-      + musc(j.hip, j.sh, W.torso, -1, .06, .42, 'lower back', 'torso') + musc(j.hip, j.sh, W.torso, -1, .84, 1.02, 'traps', 'torso');
-    const glute = hot.has('glutes') || warm.has('glutes') ? (() => { let dx = j.sh[0] - j.hip[0], dy = j.sh[1] - j.hip[1]; const l = Math.hypot(dx, dy); dx /= l; dy /= l; return `<circle cx="${(j.hip[0] + dy * 7 - dx * 2).toFixed(1)}" cy="${(j.hip[1] - dx * 7 - dy * 2).toFixed(1)}" r="8.5" fill="${hot.has('glutes') ? C.hot : C.warm}" class="mg"/>`; })() : '';
-    const shoulder = `<circle cx="${j.sh[0].toFixed(1)}" cy="${j.sh[1].toFixed(1)}" r="8" fill="${hot.has('shoulders') ? C.hot : warm.has('shoulders') ? C.warm : 'url(#rgN)'}" stroke="${C.line}" stroke-width="1.2" ${hot.has('shoulders') || warm.has('shoulders') ? 'class="mg"' : ''}/>`;
-    const neck = seg(j.sh, j.nk, 7, C.near) + musc(j.sh, j.nk, 7, 0, 0, 1, 'neck', 0) + musc(j.sh, j.nk, 7, 0, 0, .8, 'traps', 0);
-    const head = `<circle cx="${j.hd[0].toFixed(1)}" cy="${j.hd[1].toFixed(1)}" r="${this.L.head + 1.2}" fill="${C.line}"/><circle cx="${j.hd[0].toFixed(1)}" cy="${j.hd[1].toFixed(1)}" r="${this.L.head}" fill="url(#rgN)"/>`;
+    // Muskelbauch als leuchtende Ellipse
+    const belly = (a, b, side, t0, t1, wid, m, ant, op = 1) => {
+      const lvl = hot.has(m) ? 'hot' : warm.has(m) ? 'warm' : null; if (!lvl) return '';
+      const [dx, dy, l] = unit(a, b); let n = [dy, -dx]; if (ant === 'torso') n = [-dy, dx];
+      const c = lerp(a, b, (t0 + t1) / 2), cx = c[0] + n[0] * side * wid * .5, cy = c[1] + n[1] * side * wid * .5;
+      const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+      return `<ellipse class="mg ${lvl}" cx="${F(cx)}" cy="${F(cy)}" rx="${F(l * (t1 - t0) / 2)}" ry="${F(wid * .62)}" transform="rotate(${F(ang)} ${F(cx)} ${F(cy)})" fill="${C[lvl]}" opacity="${op}"/>`;
+    };
+    const UA = { w1: 11, w2: 7.5, ma: 6.6, mp: 6.4, t: .42 }, FA = { w1: 8.6, w2: 5.4, ma: 5.4, mp: 4.6, t: .25 }, TH = { w1: 17, w2: 10.5, ma: 9.8, mp: 9.2, t: .36 }, SH = { w1: 10.5, w2: 6.2, ma: 5, mp: 7.8, t: .3 };
+    const limbArm = (A, col, op) => limb(j.sh, A.el, UA, col) + limb(A.el, A.wr, FA, col)
+      + belly(j.sh, A.el, 1, .2, .8, 5, 'biceps', 0, op) + belly(j.sh, A.el, -1, .12, .82, 5, 'triceps', 0, op) + belly(A.el, A.wr, 0, .06, .6, 4.6, 'forearms', 0, op)
+      + `<ellipse cx="${F(A.wr[0])}" cy="${F(A.wr[1])}" rx="4.6" ry="4" fill="${col}" stroke="${C.line}" stroke-width="1.4"/>`;
+    const limbLeg = (G, col, op) => limb(j.hip, G.k, TH, col) + limb(G.k, G.an, SH, col)
+      + `<path d="M${F(G.an[0])} ${F(G.an[1])} L${F(G.toe[0])} ${F(G.toe[1])}" stroke="${C.line}" stroke-width="8.4" stroke-linecap="round"/><path d="M${F(G.an[0])} ${F(G.an[1])} L${F(G.toe[0])} ${F(G.toe[1])}" stroke="${col}" stroke-width="6" stroke-linecap="round"/>`
+      + belly(j.hip, G.k, 1, .14, .86, 8, 'quadriceps', 0, op) + belly(j.hip, G.k, -1, .18, .86, 7.5, 'hamstrings', 0, op)
+      + belly(j.hip, G.k, 0, .2, .7, 6, 'adductors', 0, op * .8) + belly(j.hip, G.k, 0, .04, .4, 6, 'abductors', 0, op * .8)
+      + belly(G.k, G.an, -1, .08, .58, 6.5, 'calves', 0, op);
+    // V-förmiger Rumpf
+    const [tx, ty] = unit(j.hip, j.sh), tn = [-ty, tx]; // tn = vorne
+    const at = (t, s) => { const q = lerp(j.hip, j.sh, t); return [q[0] + tn[0] * s, q[1] + tn[1] * s]; };
+    const fr = [[0, 11], [.3, 10], [.55, 11.5], [.78, 16], [1, 11.5]], bk = [[1, -12], [.72, -14], [.4, -10.5], [.12, -12.5], [0, -11]];
+    const pts = [...fr.map(([t, s]) => at(t, s)), ...bk.map(([t, s]) => at(t, s))];
+    let td = `M${F(pts[0][0])} ${F(pts[0][1])}`;
+    for (let i = 0; i < pts.length; i++) { const p0 = pts[(i - 1 + pts.length) % pts.length], p1 = pts[i], p2 = pts[(i + 1) % pts.length], p3 = pts[(i + 2) % pts.length];
+      td += ` C${F(p1[0] + (p2[0] - p0[0]) / 6)} ${F(p1[1] + (p2[1] - p0[1]) / 6)} ${F(p2[0] - (p3[0] - p1[0]) / 6)} ${F(p2[1] - (p3[1] - p1[1]) / 6)} ${F(p2[0])} ${F(p2[1])}`; }
+    const torso = `<path d="${td}Z" fill="url(#rgN)" stroke="${C.line}" stroke-width="2.4"/>`
+      + `<path d="M${F(at(.62, 3)[0])} ${F(at(.62, 3)[1])} Q${F(at(.78, 12)[0])} ${F(at(.78, 12)[1])} ${F(at(.95, 9)[0])} ${F(at(.95, 9)[1])}" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="1.2"/>`
+      + belly(j.hip, j.sh, 1, .62, .95, 11, 'chest', 'torso') + belly(j.hip, j.sh, 1, .08, .56, 8.5, 'abdominals', 'torso')
+      + belly(j.hip, j.sh, -1, .42, .86, 10, 'lats', 'torso') + belly(j.hip, j.sh, -1, .55, .86, 6, 'middle back', 'torso')
+      + belly(j.hip, j.sh, -1, .04, .42, 7, 'lower back', 'torso') + belly(j.hip, j.sh, -1, .84, 1.04, 6, 'traps', 'torso');
+    const glute = hot.has('glutes') || warm.has('glutes') ? (() => { const g = at(.02, -9); return `<ellipse class="mg ${hot.has('glutes') ? 'hot' : 'warm'}" cx="${F(g[0])}" cy="${F(g[1])}" rx="9.5" ry="9" fill="${hot.has('glutes') ? C.hot : C.warm}"/>`; })() : '';
+    const shL = hot.has('shoulders') ? 'hot' : warm.has('shoulders') ? 'warm' : '';
+    const shoulder = `<circle cx="${F(j.sh[0])}" cy="${F(j.sh[1])}" r="8.6" fill="${shL ? C[shL] : 'url(#rgN)'}" stroke="${C.line}" stroke-width="1.6" ${shL ? `class="mg ${shL}"` : ''}/>`;
+    const nkL = hot.has('neck') || hot.has('traps') ? 'url(#rgHot)' : warm.has('neck') || warm.has('traps') ? C.warm : 'url(#rgN)';
+    const neck = `<path d="M${F(j.sh[0])} ${F(j.sh[1])} L${F(j.nk[0])} ${F(j.nk[1])}" stroke="${C.line}" stroke-width="10" stroke-linecap="round"/><path d="M${F(j.sh[0])} ${F(j.sh[1])} L${F(j.nk[0])} ${F(j.nk[1])}" stroke="${nkL}" stroke-width="7.6" stroke-linecap="round"/>`;
+    const [hx, hy] = unit(j.nk, j.hd), face = [j.hd[0] - hy * 4.5 + hx * -2, j.hd[1] + hx * 4.5 + hy * -2];
+    const head = `<circle cx="${F(j.hd[0])}" cy="${F(j.hd[1])}" r="${this.L.head + 1.3}" fill="${C.line}"/><ellipse cx="${F(face[0])}" cy="${F(face[1])}" rx="5.4" ry="4.6" fill="${C.line}"/><circle cx="${F(j.hd[0])}" cy="${F(j.hd[1])}" r="${this.L.head}" fill="url(#rgN)"/><ellipse cx="${F(face[0])}" cy="${F(face[1])}" rx="4.2" ry="3.4" fill="url(#rgN)"/>`;
     // Geräte
     let props = '', back = '';
     const eq = ex ? ex.eq : '';
@@ -191,7 +217,9 @@ const Rig = {
   },
   svg(id, cls = '') {
     return `<svg class="rig ${cls}" viewBox="0 -26 200 216" data-rig="${esc(id)}" role="img" aria-label="Animation der Übung">
-      <defs><linearGradient id="rgN" gradientUnits="userSpaceOnUse" x1="40" y1="10" x2="170" y2="190"><stop offset="0" stop-color="#f2f4f6"/><stop offset=".55" stop-color="#c4c9ce"/><stop offset="1" stop-color="#8c939a"/></linearGradient>
+      <defs><linearGradient id="rgN" gradientUnits="userSpaceOnUse" x1="40" y1="0" x2="170" y2="190"><stop offset="0" stop-color="#f6f7f8"/><stop offset=".5" stop-color="#c9ced3"/><stop offset="1" stop-color="#868d94"/></linearGradient>
+      <linearGradient id="rgF2" gradientUnits="userSpaceOnUse" x1="40" y1="0" x2="170" y2="190"><stop offset="0" stop-color="#9aa1a8"/><stop offset="1" stop-color="#4f565d"/></linearGradient>
+      <radialGradient id="rgHot" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ff7a6a"/><stop offset=".55" stop-color="#ff2a3d"/><stop offset="1" stop-color="#b3101f"/></radialGradient>
       <radialGradient id="rgF" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
       <ellipse cx="100" cy="${this.GROUND + 2}" rx="78" ry="8" fill="url(#rgF)"/><g class="rg">${this.frame(id, 0)}</g></svg>`;
   },

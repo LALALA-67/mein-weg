@@ -103,6 +103,7 @@ const Sync = {
     App.render();
     await this.pull();
     App.applyTheme(); App.render();
+    if (typeof Push !== 'undefined') Push.sync();
   },
   wipe() {
     Store.keys().forEach(k => localStorage.removeItem(Store.P + k));
@@ -185,10 +186,11 @@ const Sync = {
 };
 
 /* ===== Einstellungen ===== */
-const DEFAULTS = { goals: { kcal: 2000, p: 150, c: 200, f: 50 }, water: 8, theme: 'dark', routine: ['Gesichtspflege morgens', 'Lernen', 'Zimmer aufräumen'] };
+const DEFAULTS = { goals: { kcal: 2000, p: 150, c: 200, f: 50 }, water: 8, theme: 'dark', routine: [] };
+const OLD_ROUTINE = ['Gesichtspflege morgens', 'Lernen', 'Zimmer aufräumen'];
 const Settings = {
-  get() { const s = Store.get('settings', {}); return { ...DEFAULTS, ...s, goals: { ...DEFAULTS.goals, ...(s.goals || {}) } }; },
-  update(fn) { const s = clone(this.get()); fn(s); Store.set('settings', s); App.applyTheme(); if (window.FX) FX.apply(); App.render(); }
+  get() { const s = Store.get('settings', {}); const o = { ...DEFAULTS, ...s, goals: { ...DEFAULTS.goals, ...(s.goals || {}) } }; if (Array.isArray(o.routine) && o.routine.join('|') === OLD_ROUTINE.join('|')) o.routine = []; return o; },
+  update(fn) { const s = clone(this.get()); fn(s); Store.set('settings', s); App.applyTheme(); if (typeof FX !== 'undefined') FX.apply(); App.render(); }
 };
 
 /* ===== App-Kern ===== */

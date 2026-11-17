@@ -238,12 +238,18 @@ function workoutSummary(w, fresh) {
   App.modal(() => {
     const c = Body.forWorkout(w), sets = w.ex.reduce((a, x) => a + x.sets.length, 0), vol = w.ex.reduce((a, x) => a + x.sets.reduce((b, s) => b + s.r * s.kg, 0), 0);
     const top = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([m]) => MUSCLE_DE[m]);
+    const mc = Train.monthCounts(w.date.slice(0, 7)), mtop = Object.entries(mc.c).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([m]) => MUSCLE_DE[m]);
     return `${App.sheetHead(fresh ? 'Workout geschafft!' : esc(w.name))}
       <p class="small">${esc(w.name)} · ${fmtDate(w.date)}</p>
       <div class="sumstats"><div><b>${fmtDur(w.dur).replace(' Min', '′').replace(' Std ', 'h ')}</b><span>Dauer</span></div><div><b>${sets}</b><span>Sätze</span></div><div><b>${num(vol)}</b><span>kg bewegt</span></div></div>
       <div class="row between" style="margin-bottom:6px"><h3>Das hast du trainiert</h3>${Body.sexSwitch()}</div>
-      <div class="card" style="padding:10px">${Body.svg(c, null, { mini: true })}<div class="legend" style="margin-top:6px"><span>wenig</span><i></i><span>viel</span></div></div>
-      ${top.length ? `<p style="margin:10px 0">Am stärksten: <b>${top.join(', ')}</b></p>` : ''}
+      <div class="sumbodies">
+        <div class="card" style="padding:10px"><h3 style="text-align:center;margin-bottom:4px">Dieses Workout</h3>${Body.svg(c, null, { mini: true })}
+          ${top.length ? `<p class="small" style="text-align:center;margin-top:6px">Am stärksten: <b>${top.join(', ')}</b></p>` : ''}</div>
+        <div class="card" style="padding:10px"><h3 style="text-align:center;margin-bottom:4px">Dein ${MO[parse(w.date).getMonth()]}</h3>${Body.svg(mc.c, null, { mini: true })}
+          <p class="small" style="text-align:center;margin-top:6px">${mc.count} Workouts · am meisten: <b>${mtop.join(', ') || '–'}</b></p></div>
+      </div>
+      <div class="legend" style="margin:8px 0 12px"><span>wenig</span><i></i><span>viel</span></div>
       <div class="stack">${w.ex.map(x => `<div class="exrow">${Train.anim(x.id, 'sm')}<span class="t"><b>${esc(Train.name(x.id))}</b><span class="small">${x.sets.map(s => `${num(s.r)} × ${num(s.kg, 1)} kg`).join(' · ')}</span></span></div>`).join('')}</div>
       ${fresh ? '<button class="pri" style="width:100%;margin-top:14px" data-a="closeModal">Fertig</button>' : `<button class="danger" style="width:100%;margin-top:14px" data-a="trDelWorkout" data-v="${w.id}">${ic('trash')} Workout löschen</button>`}`;
   });

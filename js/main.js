@@ -66,6 +66,7 @@ Views.einstellungen = {
     return `<div class="top"><h1>Einstellungen</h1></div><div class="cards">
       <div class="col"><section class="card"><h2>Design</h2><div class="seg" style="width:100%">${[['dark', 'Nacht'], ['light', 'Nebel'], ['auto', 'Automatisch']].map(([k, l]) => `<button class="grow" data-a="theme" data-v="${k}" aria-pressed="${s.theme === k}">${l}</button>`).join('')}</div>
         <div class="row between" style="margin-top:14px"><span><b>Regen & Gewitter</b><br><span class="small">Animierter Regen und ab und zu ein Blitz</span></span><button class="chk" style="width:52px;border-radius:99px" data-a="rainToggle" aria-pressed="${FX.on}" aria-label="Regen an/aus">${FX.on ? ic('check') : ''}</button></div></section>
+      <section class="card"><h2>Benachrichtigungen</h2>${Push.box()}</section>
       <section class="card"><h2>Dein Körper</h2><p class="small" style="margin-bottom:10px">Für die Körperkarte nach dem Training und im Monatsrückblick.</p>${Body.sexSwitch()}</section>
       <section class="card"><h2>App installieren</h2>${installBox()}</section>
       <section class="card"><h2>Deine Tagesziele</h2><form data-f="goals" class="stack"><div class="formgrid">
@@ -133,7 +134,7 @@ const Auth = {
         <button class="pri" ${this.busy ? 'disabled' : ''}>${this.busy ? 'Einen Moment …' : reg ? 'Konto erstellen' : 'Anmelden'}</button>
         ${reg ? '' : '<button type="button" class="ghost" data-a="authMode" data-v="reset">Passwort vergessen?</button>'}</form>`;
     }
-    return `<div class="authwrap"><div class="authcard">${LOGO}<h1>The Lore</h1><p class="muted" style="margin:4px 0 18px">Essen, Training, Gesicht & Termine – alles in einer App.</p>
+    return `<div class="authwrap"><div class="authcard">${LOGO}<h1 style="margin-bottom:18px">The Lore</h1>
       ${this.err ? `<p class="amsg err">${esc(this.err)}</p>` : ''}${this.msg ? `<p class="amsg">${esc(this.msg)}</p>` : ''}${body}</div></div>`;
   }
 };
@@ -166,3 +167,4 @@ Forms.authNewPw = async v => {
 App.start();
 FX.init();
 Rig.start();
+Push.init();

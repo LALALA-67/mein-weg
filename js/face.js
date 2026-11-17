@@ -83,8 +83,10 @@ function faceSVG(anim, cls = '') {
     <linearGradient id="fhair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2622"/><stop offset="1" stop-color="#160d0b"/></linearGradient>
     <linearGradient id="flip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c25a72"/><stop offset="1" stop-color="#963049"/></linearGradient>
     <radialGradient id="firis" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#7b5a3c"/><stop offset="1" stop-color="#2e1c12"/></radialGradient>
-    <linearGradient id="fquartz" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c9d6"/><stop offset="1" stop-color="#d98aa3"/></linearGradient></defs>
+    <linearGradient id="fquartz" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c9d6"/><stop offset="1" stop-color="#d98aa3"/></linearGradient>
+    <filter id="fsoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.6"/></filter><filter id="fsoft2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.2"/></filter></defs>
     <path d="M38 104 Q32 28 100 24 Q168 28 162 104 L172 204 Q150 218 132 198 L128 150 L72 150 L68 198 Q50 218 28 204Z" fill="url(#fhair)"/>
+    <path d="M44 110 Q40 160 36 200 M52 120 Q50 170 46 206 M156 110 Q160 160 164 200 M148 120 Q150 170 154 206" stroke="rgba(255,230,210,.10)" stroke-width="2" fill="none" stroke-linecap="round"/>
     <path d="M10 230 Q20 198 72 192 L128 192 Q180 198 190 230Z" fill="var(--pink)"/><path d="M84 192 L100 214 L116 192" fill="#e2b49b"/>
     <path d="M80 140 Q81 176 76 196 Q100 206 124 196 Q119 176 120 140Z" fill="#e6b9a1"/>
     <path d="M80 150 Q100 176 120 150 L120 164 Q100 184 80 164Z" fill="rgba(140,80,60,.28)"/>
@@ -93,17 +95,24 @@ function faceSVG(anim, cls = '') {
       <ellipse class="bulge" cx="47" cy="134" rx="15" ry="19" fill="#efcab3"/><ellipse class="bulge" cx="153" cy="134" rx="15" ry="19" fill="#efcab3"/>
       <ellipse cx="44" cy="112" rx="7" ry="12" fill="#e6b9a1"/><ellipse cx="156" cy="112" rx="7" ry="12" fill="#e6b9a1"/>
       <path d="M44 102 Q44 50 100 42 Q156 50 156 102 Q156 140 137 160 Q118 179 100 181 Q82 179 63 160 Q44 140 44 102Z" fill="url(#fskin)"/>
-      <path d="M50 120 Q56 150 74 166 Q60 146 58 118Z M150 120 Q144 150 126 166 Q140 146 142 118Z" fill="rgba(170,100,80,.18)"/>
+      <g filter="url(#fsoft)" pointer-events="none">
+        <path d="M50 116 Q54 150 76 168 Q62 146 60 114Z M150 116 Q146 150 124 168 Q138 146 140 114Z" fill="rgba(160,90,70,.35)"/>
+        <ellipse cx="76" cy="94" rx="15" ry="6" fill="rgba(150,85,75,.28)"/><ellipse cx="124" cy="94" rx="15" ry="6" fill="rgba(150,85,75,.28)"/>
+        <ellipse cx="72" cy="118" rx="10" ry="5" fill="rgba(255,255,255,.32)"/><ellipse cx="128" cy="118" rx="10" ry="5" fill="rgba(255,255,255,.32)"/>
+        <ellipse cx="100" cy="66" rx="20" ry="7" fill="rgba(255,255,255,.22)"/><ellipse cx="100" cy="166" rx="10" ry="4" fill="rgba(255,255,255,.22)"/>
+        <path d="M92 104 Q90 116 88 124" stroke="rgba(150,90,70,.45)" stroke-width="3" fill="none"/><path d="M108 104 Q110 116 112 124" stroke="rgba(150,90,70,.25)" stroke-width="3" fill="none"/>
+      </g>
       <path class="bangs" d="M42 106 Q36 40 100 34 Q162 38 160 102 Q152 64 120 54 Q98 74 66 72 Q52 82 42 106Z" fill="url(#fhair)"/>
-      <path d="M66 70 Q90 66 112 52 M80 66 Q100 58 116 50 M128 58 Q146 72 154 96" stroke="rgba(255,255,255,.08)" stroke-width="1.5" fill="none"/>
+      <path d="M66 70 Q90 66 112 52 M80 66 Q100 58 116 50 M128 58 Q146 72 154 96 M58 74 Q70 60 96 50 M134 62 Q150 78 156 104" stroke="rgba(255,235,220,.12)" stroke-width="1.4" fill="none"/>
       <path class="fl" d="M78 66 Q100 61 122 66 M82 72 Q100 68 118 72" stroke="${line}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       <ellipse class="hollow" cx="70" cy="140" rx="9" ry="15" fill="rgba(140,70,55,.24)"/><ellipse class="hollow" cx="130" cy="140" rx="9" ry="15" fill="rgba(140,70,55,.24)"/>
-      <ellipse class="ck" cx="68" cy="130" rx="13" ry="8" fill="rgba(226,110,124,.32)"/><ellipse class="ck" cx="132" cy="130" rx="13" ry="8" fill="rgba(226,110,124,.32)"/>
-      <path class="bw" d="M61 86 Q73 75 90 81 Q76 80 61 89Z" fill="#33201c"/><path class="bw" d="M139 86 Q127 75 110 81 Q124 80 139 89Z" fill="#33201c"/>
+      <ellipse class="ck" cx="68" cy="130" rx="14" ry="9" fill="rgba(226,110,124,.3)" filter="url(#fsoft)"/><ellipse class="ck" cx="132" cy="130" rx="14" ry="9" fill="rgba(226,110,124,.3)" filter="url(#fsoft)"/>
+      <g class="bw"><path d="M61 86 Q73 75 90 81 Q76 80 61 89Z" fill="#33201c"/><path d="M64 85 l3 -4 M68 83 l3 -4.5 M72 81 l3 -4 M76 80 l3 -3.6 M80 79.5 l3 -3 M84 79.5 l3 -2.4" stroke="#2a1915" stroke-width=".7" stroke-linecap="round"/></g><g class="bw"><path d="M139 86 Q127 75 110 81 Q124 80 139 89Z" fill="#33201c"/><path d="M136 85 l-3 -4 M132 83 l-3 -4.5 M128 81 l-3 -4 M124 80 l-3 -3.6 M120 79.5 l-3 -3 M116 79.5 l-3 -2.4" stroke="#2a1915" stroke-width=".7" stroke-linecap="round"/></g>
       <g class="eye"><path d="M65 101 Q76 92 89 101 Q77 108 65 101Z" fill="#fbf7f2"/><g class="pu"><circle cx="77" cy="100.5" r="5" fill="url(#firis)"/><circle cx="77" cy="100.5" r="2.1" fill="#120a07"/><circle cx="78.6" cy="98.8" r="1.1" fill="#fff"/></g><path d="M64 101 Q76 91 90 100" stroke="#24150f" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M66 99 l-3 -3 M70 95.6 l-1.6 -3.4 M75 94 l-.6 -3.6 M80 94 l.6 -3.4 M85 96 l1.6 -3" stroke="#24150f" stroke-width="1.1" stroke-linecap="round"/><path d="M67 103.5 Q77 108 87 103" stroke="${line}" stroke-width="1" fill="none"/></g>
       <g class="eye"><path d="M135 101 Q124 92 111 101 Q123 108 135 101Z" fill="#fbf7f2"/><g class="pu"><circle cx="123" cy="100.5" r="5" fill="url(#firis)"/><circle cx="123" cy="100.5" r="2.1" fill="#120a07"/><circle cx="124.6" cy="98.8" r="1.1" fill="#fff"/></g><path d="M136 101 Q124 91 110 100" stroke="#24150f" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M134 99 l3 -3 M130 95.6 l1.6 -3.4 M125 94 l.6 -3.6 M120 94 l-.6 -3.4 M115 96 l-1.6 -3" stroke="#24150f" stroke-width="1.1" stroke-linecap="round"/><path d="M133 103.5 Q123 108 113 103" stroke="${line}" stroke-width="1" fill="none"/></g>
       <path d="M97 100 Q95 114 92 123" stroke="rgba(160,100,80,.45)" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M91 125 Q95 129 100 127.5 Q105 129 109 125" stroke="#b07c66" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="100" cy="120" rx="3.5" ry="2.2" fill="rgba(255,255,255,.35)"/>
+      <path d="M90 124 Q94 130 100 128.5 Q106 130 110 124" stroke="#b07c66" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="95.5" cy="126.5" rx="2.4" ry="1.4" fill="#8a5446"/><ellipse cx="104.5" cy="126.5" rx="2.4" ry="1.4" fill="#8a5446"/><ellipse cx="100" cy="120" rx="3.8" ry="2.4" fill="rgba(255,255,255,.4)" filter="url(#fsoft2)"/>
+      <path d="M97.5 131 L97 141 M102.5 131 L103 141" stroke="rgba(160,100,80,.28)" stroke-width="1.2" fill="none"/>
       <path class="chin" d="M91 170 Q100 175 109 170" stroke="${line}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       <g class="mouth">
         <g class="m m-n"><path d="M86 148 Q93 142 100 145.5 Q107 142 114 148 Q100 150.5 86 148Z" fill="url(#flip)"/><path d="M86 148 Q100 151 114 148 Q108 157 100 157 Q92 157 86 148Z" fill="${lipD}"/><path d="M93 153 Q100 155 106 153" stroke="rgba(255,255,255,.35)" stroke-width="1.2" fill="none"/></g>

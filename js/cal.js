@@ -2,14 +2,17 @@
 /* ===== Kalender im Stil von Google Kalender: Tag / Woche / Monat ===== */
 const CATS = [['termin', 'Termin', '#3e5f86'], ['test', 'Test / Prüfung', '#a3243a'], ['wichtig', 'Wichtig', '#7a2d6e'], ['schule', 'Schule / Arbeit', '#8a6a1c'], ['sport', 'Sport', '#2f6b5a'], ['privat', 'Privat', '#54458a']];
 const HOUR = 48;
+const CAT_COLORS = ['#3e5f86', '#a3243a', '#7a2d6e', '#8a6a1c', '#2f6b5a', '#54458a', '#9a4a1e', '#1f6f7a', '#5c5f66', '#b0325a'];
+const REM = [[0, 'Zum Termin'], [10, '10 Min vorher'], [30, '30 Min vorher'], [60, '1 Std vorher'], [180, '3 Std vorher'], [1440, '1 Tag vorher'], [2880, '2 Tage vorher'], [10080, '1 Woche vorher']];
+const allCats = () => [...CATS, ...((Store.get('cats', { list: [] }).list) || []).map(c => [c.k, c.label, c.color, true])];
 const toMin = t => { const [h, m] = (t || '0:0').split(':').map(Number); return h * 60 + (m || 0); };
 const toTime = m => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
 const Cal = {
   view: innerWidth < 700 ? 'day' : 'week', at: today(), ed: null, scrolled: null,
   events() { return Store.get('events', { list: [] }).list || []; },
-  save(l) { Store.set('events', { list: l }); App.render(); },
-  color(e) { return (CATS.find(c => c[0] === e.cat) || CATS[0])[2]; },
-  catName(e) { return (CATS.find(c => c[0] === e.cat) || CATS[0])[1]; },
+  save(l) { Store.set('events', { list: l }); App.render(); if (typeof Push !== 'undefined') Push.sync(); },
+  color(e) { return (allCats().find(c => c[0] === e.cat) || CATS[0])[2]; },
+  catName(e) { return (allCats().find(c => c[0] === e.cat) || CATS[0])[1]; },
   on(d) { return this.events().filter(e => e.date === d).sort((a, b) => (b.allDay ? 1 : 0) - (a.allDay ? 1 : 0) || toMin(a.start) - toMin(b.start)); },
   timeLabel(e) { return e.allDay ? 'Ganztägig' : `${e.start} – ${e.end}`; },
   weekStart(d) { const x = parse(d); return addDays(d, -((x.getDay() + 6) % 7)); },
@@ -83,17 +86,22 @@ function agenda() {
 
 /* --- Termin-Dialog --- */
 function eventModal() {
-  const e = Cal.ed;
+  const e = Cal.ed, nc = Cal.newCat, rem = e.rem || [];
   return `${App.sheetHead(e.isNew ? 'Neuer Termin' : 'Termin bearbeiten')}
-    <div class="stack"><input id="etitle" data-i="calTitle" value="${esc(e.title)}" placeholder="Titel, z. B. Mathe-Test" style="font-size:20px;font-weight:800" autocomplete="off" autofocus>
+    <div class="stack"><input id="etitle" data-i="calTitle" value="${esc(e.title)}" placeholder="Titel" style="font-size:20px;font-weight:700" autocomplete="off" autofocus>
     <label style="display:flex;align-items:center;gap:10px;color:var(--ink)"><input type="checkbox" data-c="calAll" ${e.allDay ? 'checked' : ''} style="width:22px;min-height:22px;accent-color:var(--acc)"> Ganztägig</label>
     <div class="formgrid"><label>Datum<input id="edate" type="date" value="${e.date}" data-c="calDate"></label>
     ${e.allDay ? '' : `<label>Beginn<input id="estart" type="time" value="${e.start}" data-c="calStart"></label><label>Ende<input id="eend" type="time" value="${e.end}" data-c="calEnd"></label>`}</div>
-    <div><p class="small" style="margin-bottom:6px">Kategorie</p><div class="colors">${CATS.map(([k, l, c]) => `<button data-a="calCat" data-v="${k}" aria-pressed="${e.cat === k}"><i style="background:${c}"></i>${l}</button>`).join('')}</div></div>
+    <div><p class="small" style="margin-bottom:6px">Kategorie</p><div class="colors">${allCats().map(([k, l, c, own]) => `<span class="catwrap"><button data-a="calCat" data-v="${esc(k)}" aria-pressed="${e.cat === k}"><i style="background:${c}"></i>${esc(l)}</button>${own ? `<button class="catdel" data-a="calCatDel" data-v="${esc(k)}" aria-label="Kategorie löschen">×</button>` : ''}</span>`).join('')}
+      <button data-a="calCatNew" aria-pressed="${!!nc}" style="border-style:dashed">${ic('plus')} Eigene</button></div>
+      ${nc ? `<div class="card" style="margin-top:8px;padding:12px"><div class="row"><input id="ncname" data-i="calNcName" placeholder="z. B. Training, Arbeit, Party" value="${esc(nc.label)}" autocomplete="off"><button class="pri" data-a="calCatSave">Anlegen</button></div>
+        <div class="colors" style="margin-top:8px">${CAT_COLORS.map(c => `<button data-a="calNcColor" data-v="${c}" aria-pressed="${nc.color === c}" aria-label="Farbe" style="padding:4px"><i style="background:${c}"></i></button>`).join('')}</div></div>` : ''}</div>
+    <div><p class="small" style="margin-bottom:6px">Erinnerung</p><div class="chips">${REM.map(([m, l]) => `<button class="chip" data-a="calRem" data-v="${m}" aria-pressed="${rem.includes(m)}">${l}</button>`).join('')}</div>
+      ${rem.length && !Push.on() ? '<p class="small" style="margin-top:6px">Damit Erinnerungen ankommen, schalte unter Einstellungen → Benachrichtigungen ein.</p>' : ''}</div>
     <label>Notiz<textarea id="enote" data-i="calNote" placeholder="Raum, Themen, mitbringen …">${esc(e.note || '')}</textarea></label>
     <div class="row">${e.isNew ? '' : `<button class="danger" data-a="calDel">${ic('trash')} Löschen</button>`}<button class="pri grow" data-a="calSave">Speichern</button></div></div>`;
 }
-function openEvent(e) { Cal.ed = e; App.modal(eventModal); }
+function openEvent(e) { if (!e.rem) e.rem = e.isNew ? (e.allDay ? [0] : [60]) : []; Cal.ed = e; Cal.newCat = null; App.modal(eventModal); }
 Actions.calView = el => { Cal.view = el.dataset.v; App.render(); };
 Actions.calToday = () => { Cal.at = today(); App.render(); };
 Actions.calNav = el => {
@@ -119,6 +127,13 @@ Changes.calDate = el => { if (el.value) Cal.ed.date = el.value; };
 Changes.calStart = el => { const e = Cal.ed, dur = toMin(e.end) - toMin(e.start); e.start = el.value || e.start; e.end = toTime(Math.min(toMin(e.start) + Math.max(dur, 15), 23 * 60 + 59)); App.refreshModal(); };
 Changes.calEnd = el => { const e = Cal.ed; e.end = el.value || e.end; if (toMin(e.end) <= toMin(e.start)) { e.end = toTime(Math.min(toMin(e.start) + 30, 23 * 60 + 59)); App.toast('Ende muss nach dem Beginn liegen.'); App.refreshModal(); } };
 Actions.calCat = el => { Cal.ed.cat = el.dataset.v; App.refreshModal(); };
+Actions.calRem = el => { const m = +el.dataset.v, r = Cal.ed.rem || (Cal.ed.rem = []); const i = r.indexOf(m); if (i >= 0) r.splice(i, 1); else r.push(m); App.refreshModal(); };
+Actions.calCatNew = () => { Cal.newCat = Cal.newCat ? null : { label: '', color: CAT_COLORS[(allCats().length) % CAT_COLORS.length] }; App.refreshModal(); };
+Changes.calNcName = el => { Cal.newCat.label = el.value; };
+Actions.calNcColor = el => { Cal.newCat.color = el.dataset.v; App.refreshModal(); };
+Actions.calCatSave = () => { const n = Cal.newCat; if (!n || !n.label.trim()) { App.toast('Gib der Kategorie einen Namen.'); return; }
+  const l = Store.get('cats', { list: [] }).list || [], k = 'c-' + uid(); l.push({ k, label: n.label.trim(), color: n.color }); Store.set('cats', { list: l }); Cal.ed.cat = k; Cal.newCat = null; App.refreshModal(); };
+Actions.calCatDel = el => { const k = el.dataset.v; Store.set('cats', { list: (Store.get('cats', { list: [] }).list || []).filter(c => c.k !== k) }); if (Cal.ed.cat === k) Cal.ed.cat = 'termin'; App.refreshModal(); };
 Actions.calSave = () => {
   const e = Cal.ed; if (!e.title.trim()) { App.toast('Gib dem Termin einen Titel.'); $('#etitle') && $('#etitle').focus(); return; }
   const { isNew, ...clean } = e; clean.title = clean.title.trim();
