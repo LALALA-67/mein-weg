@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7b6d2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mein Weg">
+<title>Mein Weg</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>try{const t=JSON.parse(localStorage.getItem('mw:settings')||'null');const v=t&&t.d&&t.d.theme;if(v==='light'||v==='dark')document.documentElement.dataset.theme=v}catch(e){}</script>
+</head>
+<body>
+<div class="app">
+  <nav id="nav" aria-label="Bereiche"></nav>
+  <main id="main"><p class="empty">Wird geladen …</p></main>
+</div>
+<div id="modal" class="modal" hidden><div class="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="player" class="player" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/food.js"></script>
+<script src="js/body.js"></script>
+<script src="js/train.js"></script>
+<script src="js/face.js"></script>
+<script src="js/cal.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
