@@ -1,24 +1,29 @@
-/* Mein Weg – babyrosa, hell & dunkel */
+/* Mein Weg – Mystic Falls: Nebelwald, Regen, Blutrot. Nacht (dunkel) & Nebel (hell) */
 :root{
-  --bg:#fff5f9;--card:#ffffff;--card2:#ffeaf3;--line:#f5d2e1;--ink:#3d2030;--mute:#8d6678;
-  --pink:#f7b6d2;--pink2:#f29cc2;--acc:#d6518e;--on-acc:#ffffff;--soft:#fde3ee;
-  --kcal:#e0609a;--prot:#a56be0;--carb:#f0a83c;--fat:#3fb8b0;--water:#62a8ef;
-  --body:#f1dde6;--skin:#f7d7c4;--skin2:#efc4ad;--hair:#5b3a33;--blush:#f59bb9;
-  --shadow:0 6px 24px rgba(214,81,142,.10);
+  --bg:#d3d6d2;--card:rgba(244,242,236,.80);--card2:rgba(214,216,211,.78);--line:rgba(30,36,40,.16);--ink:#15181b;--mute:#565c5e;
+  --pink:#7d1424;--pink2:#a3243a;--acc:#8e1527;--on-acc:#f6eee6;--soft:rgba(142,21,39,.12);
+  --kcal:#9e1b30;--prot:#6b4f9a;--carb:#a8822a;--fat:#2f6f66;--water:#4a6f93;
+  --body:#bcc1be;--skin:#ecd3c2;--skin2:#dcb9a4;--hair:#2a1d1a;--blush:#c98a8f;
+  --shadow:0 10px 34px rgba(20,24,28,.18);--glass:blur(10px) saturate(1.1);
+  --sky1:#9ea6a9;--sky2:#c9ceca;--tree:#4c5753;--tree2:#6b7672;--fog:rgba(235,238,236,.55);--moon:rgba(255,255,255,.75);
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){
-  --bg:#1a1116;--card:#261920;--card2:#33212b;--line:#47303d;--ink:#fbe9f2;--mute:#c39db0;
-  --pink:#f7b6d2;--pink2:#f29cc2;--acc:#f59cc4;--on-acc:#2b0f1d;--soft:#3a2431;
-  --body:#3d2a34;--shadow:0 6px 24px rgba(0,0,0,.3);color-scheme:dark}}
+  --bg:#06080b;--card:rgba(14,18,22,.74);--card2:rgba(38,43,49,.6);--line:rgba(190,200,210,.14);--ink:#ebe5db;--mute:#9b9a93;
+  --pink:#5e101d;--pink2:#a3243a;--acc:#b01e35;--on-acc:#f6eee6;--soft:rgba(176,30,53,.2);
+  --kcal:#c62a43;--prot:#9479c4;--carb:#cfa64c;--fat:#4f978c;--water:#6f93b5;--body:#262b30;
+  --shadow:0 12px 40px rgba(0,0,0,.6);--sky1:#05070a;--sky2:#121b22;--tree:#030506;--tree2:#0a1014;--fog:rgba(150,165,175,.10);--moon:rgba(235,232,220,.92);
+  color-scheme:dark}}
 :root[data-theme=dark]{
-  --bg:#1a1116;--card:#261920;--card2:#33212b;--line:#47303d;--ink:#fbe9f2;--mute:#c39db0;
-  --pink:#f7b6d2;--pink2:#f29cc2;--acc:#f59cc4;--on-acc:#2b0f1d;--soft:#3a2431;
-  --body:#3d2a34;--shadow:0 6px 24px rgba(0,0,0,.3);color-scheme:dark}
+  --bg:#06080b;--card:rgba(14,18,22,.74);--card2:rgba(38,43,49,.6);--line:rgba(190,200,210,.14);--ink:#ebe5db;--mute:#9b9a93;
+  --pink:#5e101d;--pink2:#a3243a;--acc:#b01e35;--on-acc:#f6eee6;--soft:rgba(176,30,53,.2);
+  --kcal:#c62a43;--prot:#9479c4;--carb:#cfa64c;--fat:#4f978c;--water:#6f93b5;--body:#262b30;
+  --shadow:0 12px 40px rgba(0,0,0,.6);--sky1:#05070a;--sky2:#121b22;--tree:#030506;--tree2:#0a1014;--fog:rgba(150,165,175,.10);--moon:rgba(235,232,220,.92);
+  color-scheme:dark}
 
 *{box-sizing:border-box;min-width:0}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 'EB Garamond',Georgia,serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
 h1,h2,h3{margin:0;line-height:1.15;font-weight:800}
 h1{font-size:clamp(26px,5vw,34px);font-weight:900}
 h2{font-size:19px;margin-bottom:10px}
@@ -235,8 +240,6 @@ li.done .t{text-decoration:line-through;color:var(--mute)}
 /* Kiefer seitlich */
 .f-jawside .mouth,.f-jawside .chin{animation:jawside 3s ease-in-out infinite}
 @keyframes jawside{0%,100%{transform:none}25%{transform:translateX(-9px)}50%{transform:none}75%{transform:translateX(9px)}}
-/* Wangen-Massage */
-.f-massage .hand{opacity:1;animation:rub 1.4s ease-in-out infinite}
 @keyframes rub{0%,100%{transform:translate(0,0)}25%{transform:translate(3px,-5px)}50%{transform:translate(0,-9px)}75%{transform:translate(-3px,-5px)}}
 /* Kinn nach vorn */
 .f-chin .chin,.f-chin .mouth{animation:chinfwd 2.6s ease-in-out infinite}
@@ -318,3 +321,116 @@ li.done .t{text-decoration:line-through;color:var(--mute)}
 .qa button svg{width:26px;height:26px;color:var(--acc)}
 @media(prefers-reduced-motion:reduce){.sheet{animation:none}*{transition:none!important}}
 @media(max-width:480px){.tabs button{padding:8px 12px;gap:4px}.tabs button svg{display:none}}
+/* Anmeldung */
+body.auth .app{grid-template-columns:1fr}
+body.auth nav{display:none}
+body.auth main{padding:0;max-width:none}
+.authwrap{min-height:100dvh;display:grid;place-items:center;padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));background:radial-gradient(circle at 20% 10%,var(--pink) 0,transparent 45%),radial-gradient(circle at 90% 90%,var(--pink2) 0,transparent 40%),var(--bg)}
+.authcard{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:28px;padding:28px 22px;box-shadow:0 20px 60px rgba(214,81,142,.18);text-align:center}
+.authcard .logo{width:64px;height:64px;margin-bottom:10px}
+.authcard form,.authcard label{text-align:left}
+.amsg{background:var(--soft);border-radius:14px;padding:10px 12px;font-size:14px;font-weight:700;margin-bottom:12px;text-align:left}
+.amsg.err{background:#fde2e2;color:#a32020}
+:root[data-theme=dark] .amsg.err{background:#4a1f24;color:#ffb3b3}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .amsg.err{background:#4a1f24;color:#ffb3b3}}
+
+/* ===== Mystic Falls Atmosphäre ===== */
+h1,h2,h3,.brand,nav button,.tabs button,.seg button,.big,.ringbox b,.count,.portion b,.wk-head .d b,.month .dn,.chip,.tag{font-family:Cinzel,'Trajan Pro',Georgia,serif;letter-spacing:.02em}
+h1{font-weight:700;letter-spacing:.04em}
+h2,h3{font-weight:600}
+.big,.ringbox b,.count{font-weight:600}
+label,.small,.status{font-family:'EB Garamond',Georgia,serif}
+.app,#modal,#player,.toast{position:relative;z-index:2}
+#modal,#player,.toast{position:fixed}
+.card,.folder,.exrow,.facecard,.calwrap,.qa button,.tabs button,.chip,input,select,textarea,nav,.seg{backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+.card,.folder,.calwrap{border-radius:16px}
+.card,.folder,.exrow,.facecard{border-color:var(--line)}
+button{border-radius:10px;font-weight:600}
+input,select,textarea{border-radius:10px}
+.pri{background:linear-gradient(180deg,#c42840,#8a1426);color:#f6eee6;box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 6px 20px rgba(176,30,53,.35)}
+.pink{background:var(--soft);color:var(--ink);border:1px solid rgba(176,30,53,.45)}
+.tabs button[aria-pressed=true]{background:linear-gradient(180deg,#c42840,#8a1426);border-color:transparent;color:#f6eee6}
+.hero{background:linear-gradient(135deg,rgba(120,16,32,.92),rgba(30,10,16,.92));color:#f3ece4;border:1px solid rgba(255,255,255,.06)}
+.hero .muted{color:#d8c4bf}
+nav{background:var(--card)}
+nav button[aria-current=page]{color:var(--acc)}
+nav button[aria-current=page] .ni{background:var(--soft)}
+.legend i{background:linear-gradient(90deg,var(--body),#7a1a2a,#b01e35,#e04a5f)}
+.ev,.chipev{color:#f3ece4;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.daycol{background-image:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent 48px)}
+.anim{background:#111}
+.toast{background:#1b0d12;color:#f3ece4;border:1px solid rgba(176,30,53,.5)}
+.player{background:rgba(6,8,11,.92);backdrop-filter:blur(6px)}
+:root[data-theme=light] .player{background:rgba(220,222,218,.94)}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]) .player{background:rgba(220,222,218,.94)}}
+.sheet{background:var(--bg);border:1px solid var(--line)}
+.modal{background:rgba(0,0,0,.55)}
+.authwrap{background:none}
+.authcard{background:var(--card);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);box-shadow:var(--shadow);border-radius:18px}
+.authcard h1{font-size:34px}
+.amsg{background:var(--soft)}
+.amsg.err{background:rgba(176,30,53,.22);color:inherit;border:1px solid rgba(176,30,53,.5)}
+::selection{background:#b01e35;color:#fff}
+
+/* Hintergrund-Szene */
+.scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 70%,var(--bg) 100%)}
+.scene .moon{position:absolute;top:7vh;right:12vw;width:min(22vw,150px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 38%,#fffdf6 0,var(--moon) 45%,rgba(200,200,190,.6) 70%);box-shadow:0 0 60px 20px rgba(220,220,210,.18),0 0 160px 60px rgba(200,205,210,.08);opacity:.9}
+.scene .moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 60%,rgba(0,0,0,.08) 0 8%,transparent 9%),radial-gradient(circle at 62% 35%,rgba(0,0,0,.07) 0 6%,transparent 7%),radial-gradient(circle at 55% 70%,rgba(0,0,0,.06) 0 10%,transparent 11%)}
+.scene .forest{position:absolute;left:0;right:0;bottom:0;height:42vh;background-repeat:repeat-x;background-position:bottom;background-size:auto 100%}
+.scene .f1{color:var(--tree2);opacity:.8;height:36vh;bottom:6vh}
+.scene .f2{color:var(--tree)}
+.scene .fog{position:absolute;left:-50%;width:200%;height:40vh;bottom:0;background:radial-gradient(ellipse at 20% 60%,var(--fog),transparent 60%),radial-gradient(ellipse at 60% 70%,var(--fog),transparent 55%),radial-gradient(ellipse at 90% 50%,var(--fog),transparent 60%);animation:fog 60s linear infinite}
+.scene .fog.b{bottom:12vh;opacity:.7;animation-duration:90s;animation-direction:reverse}
+@keyframes fog{from{transform:translateX(0)}to{transform:translateX(25%)}}
+.scene .flash{position:absolute;inset:0;background:rgba(210,220,235,.0)}
+.scene.lightning .flash{animation:flash 1.2s ease-out}
+@keyframes flash{0%{background:rgba(210,220,235,0)}6%{background:rgba(210,220,235,.22)}10%{background:rgba(210,220,235,.02)}16%{background:rgba(210,220,235,.16)}100%{background:rgba(210,220,235,0)}}
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+body{background:var(--bg)}
+.scene svg.forest{width:100%;display:block}
+.bodysvg .hairb{fill:#3b2e2b;opacity:.9}
+.bodysvg.mini{max-height:240px;display:block;margin:0 auto}
+.musclekey{display:flex;gap:14px;justify-content:center;font-size:14px;color:var(--mute);margin-top:6px}
+.musclekey i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.sumstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center;margin:12px 0}
+.sumstats div{background:var(--card2);border-radius:12px;padding:10px 4px}
+.sumstats b{display:block;font-family:Cinzel,Georgia,serif;font-size:20px}
+.sumstats span{font-size:13px;color:var(--mute)}
+
+/* Massage-Werkzeuge: Hände & Gua-Sha-Stein */
+.face .hd path,.face .hd rect{fill:#ecc3ab;stroke:rgba(140,80,60,.5);stroke-width:.8}
+.face .hd .sleeve{fill:var(--pink);stroke:none}
+.face .hd .nail ellipse{fill:rgba(255,240,235,.75);stroke:none}
+.face .stone path{fill:url(#fquartz);stroke:rgba(150,60,90,.5);stroke-width:1;opacity:.95}
+.face .stone .shine{stroke:rgba(255,255,255,.8);stroke-width:2;stroke-linecap:round;fill:none}
+@keyframes sweepUp{0%{transform:translateY(6px);opacity:0}15%{opacity:1}70%{transform:translateY(-18px);opacity:1}100%{transform:translateY(-22px);opacity:0}}
+@keyframes sweepLong{0%{transform:translateY(0);opacity:0}12%{opacity:1}75%{transform:translateY(-44px);opacity:1}100%{transform:translateY(-48px);opacity:0}}
+@keyframes sweepMid{0%{transform:translateY(0);opacity:0}12%{opacity:1}75%{transform:translateY(-34px);opacity:1}100%{transform:translateY(-38px);opacity:0}}
+@keyframes sweepDown{0%{transform:translateY(-4px);opacity:0}15%{opacity:1}75%{transform:translateY(28px);opacity:1}100%{transform:translateY(32px);opacity:0}}
+.f-massage .mv,.f-temples .mv,.f-eyesmass .mv{animation:rub 1.5s ease-in-out infinite}
+.f-forehead .mv{animation:sweepUp 1.6s ease-in-out infinite}.f-forehead .r .mv{animation-delay:-.8s}
+.f-lymph .mv{animation:sweepDown 2.2s ease-in-out infinite}
+.f-knuckle .mv,.f-guasha .mv{animation:sweepLong 2.4s ease-in-out infinite}
+.f-guashacheek .mv{animation:sweepMid 2.2s ease-in-out infinite}
+.f-massage .ck,.f-guashacheek .ck{animation:ckup 3s ease-in-out infinite}
+.face .tools,.face .tools g{transform-origin:0 0;transform-box:view-box}
+:root{--bodybase:#c4c8c5}
+:root[data-theme=dark]{--body:#3b4249;--bodybase:#23292e}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--body:#3b4249;--bodybase:#23292e}}
+.bodysvg .base{fill:var(--bodybase)}
+.sheet .bodysvg.mini{max-height:320px}
+
+/* Übungs-Animation im Studio-Look */
+.anim{background:radial-gradient(ellipse at 50% 35%,#2a3036 0%,#14181c 60%,#0a0c0e 100%);border:1px solid rgba(255,255,255,.06)}
+.anim svg.rig{position:absolute;inset:0;width:100%;height:100%}
+.anim .mg.hot{filter:drop-shadow(0 0 3px rgba(255,40,60,.75))}
+
+/* Gua-Sha-Zonen */
+.face.gs .bangs{display:none}
+.face .gsar{fill:none;stroke:#555a61;stroke-width:2.4;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;animation:gsdraw 2.6s ease-in-out infinite}
+@keyframes gsdraw{0%,8%{stroke-dashoffset:100;opacity:1}72%{stroke-dashoffset:0;opacity:1}90%{stroke-dashoffset:0;opacity:.9}100%{stroke-dashoffset:0;opacity:0}}
+.face .gsnum circle{fill:#fff;stroke:#3f8fb5;stroke-width:1.2}
+.face .gsnum text{font:700 7.5px Georgia,serif;fill:#2f6f8f}
+.face.paused .gsar{animation-play-state:paused}
+.face .gsov,.face .gsov g{transform-origin:0 0;transform-box:view-box}
+.face.f-gsall .gsar{stroke-width:1.7}
