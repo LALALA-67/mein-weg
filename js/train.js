@@ -26,7 +26,11 @@ const Train = {
   active() { try { return JSON.parse(localStorage.getItem('mw-active')); } catch (e) { return null; } },
   setActive(a) { if (a) localStorage.setItem('mw-active', JSON.stringify(a)); else localStorage.removeItem('mw-active'); },
   name(id) { const e = this.byId[id]; return e ? e.n : id.replace(/_/g, ' '); },
-  anim(id, cls = '') { return `<div class="anim ${cls}">${Rig.svg(id)}</div>`; },
+  anim(id, cls = '') {
+    const e = this.byId[id], u = EX_IMG + encodeURIComponent(id) + '/';
+    if (e && e.img === 0) return `<div class="anim ${cls}"></div>`;
+    return `<div class="anim photo ${cls}"><img src="${u}0.jpg" alt="" loading="lazy">${!e || e.img > 1 ? `<img src="${u}1.jpg" alt="" loading="lazy">` : ''}</div>`;
+  },
   muscles(e) { return e ? e.pm.map(m => MUSCLE_DE[m] || m).join(', ') : ''; },
   filtered() {
     let list = this.ex || [];
@@ -204,8 +208,8 @@ Actions.trDetail = el => {
     const fl = Train.folders();
     return `${App.sheetHead(esc(e.n))}${Train.anim(id)}
       <div class="chips" style="margin:12px 0"><span class="tag">${LVL_DE[e.l] || e.l}</span><span class="tag">${EQUIP_DE[e.eq] || e.eq}</span><span class="tag">${CAT_DE[e.c] || e.c}</span></div>
-      <div class="card" style="padding:12px;margin-bottom:12px">${Body.svg(Body.forExercise(e), null, { mini: true, max: 1 })}
-        <div class="musclekey"><span><i style="background:${Body.color(1)}"></i>Hauptmuskel</span><span><i style="background:${Body.color(.45)}"></i>Hilfsmuskel</span></div></div>
+      <div class="card" style="padding:12px;margin-bottom:12px">${Body.svg({}, null, { mini: true, paint: Body.exercisePaint(e) })}
+        <div class="musclekey"><span><i style="background:${Body.PRIM}"></i>Hauptmuskel</span><span><i style="background:${Body.SEC}"></i>Hilfsmuskel</span></div></div>
       <p><b>Hauptmuskeln:</b> ${e.pm.map(m => MUSCLE_DE[m]).join(', ')}${e.sm.length ? `<br><b>Hilfsmuskeln:</b> ${e.sm.map(m => MUSCLE_DE[m]).join(', ')}` : ''}</p>
       ${fl.length ? `<p class="small" style="margin:14px 0 6px">In Mappe speichern</p><div class="chips">${fl.map(f => `<button class="chip" data-a="trInFolder" data-v="${f.id}|${esc(id)}" aria-pressed="${f.ex.includes(id)}"><span class="dotc" style="background:${f.color}"></span> ${esc(f.name)}</button>`).join('')}</div>` : ''}
       <h3 style="margin:16px 0 6px">Anleitung <span class="small">(Englisch)</span></h3><ol style="margin:0;padding-left:20px;display:grid;gap:6px">${e.i.map(s => `<li>${esc(s)}</li>`).join('')}</ol>`;

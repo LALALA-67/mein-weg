@@ -6,6 +6,8 @@ const MUSCLE_DE = {
   neck: 'Nacken', quadriceps: 'Oberschenkel vorne', shoulders: 'Schultern', traps: 'Trapez', triceps: 'Trizeps'
 };
 const Body = {
+  PRIM: '#e3263a', SEC: '#f2a23a',
+  exercisePaint(e) { const c = {}; if (!e) return c; e.sm.forEach(m => c[m] = this.SEC); e.pm.forEach(m => c[m] = this.PRIM); return c; },
   sex() { return Settings.get().sex || 'w'; },
   base(x, sex) {
     const w = sex === 'w';
@@ -82,7 +84,7 @@ const Body = {
     const front = { ...this.front, ...(w ? this.womanFront : {}) }, back = { ...this.back, ...(w ? this.womanBack : {}) };
     const unit = opts.unit || 'Sätze';
     const both = list => list.map(d => d + ' ' + this.mirror(d)).join(' ');
-    const part = (list, x) => Object.entries(list).map(([m, ds]) => { const d = both(ds); return `<path data-m="${m}" ${opts.mini ? '' : `data-a="bodySel" data-v="${m}"`} class="${sel === m ? 'sel' : ''}" transform="translate(${x} 0)" d="${d}" style="fill:${this.color((counts[m] || 0) / max)}"><title>${MUSCLE_DE[m]}${opts.mini ? '' : `: ${num(counts[m] || 0, 1)} ${unit}`}</title></path>`; }).join('');
+    const part = (list, x) => Object.entries(list).map(([m, ds]) => { const d = both(ds); return `<path data-m="${m}" ${opts.mini ? '' : `data-a="bodySel" data-v="${m}"`} class="${sel === m ? 'sel' : ''}" transform="translate(${x} 0)" d="${d}" style="fill:${opts.paint ? (opts.paint[m] || 'var(--body)') : this.color((counts[m] || 0) / max)}"><title>${MUSCLE_DE[m]}${opts.mini ? '' : `: ${num(counts[m] || 0, 1)} ${unit}`}</title></path>`; }).join('');
     const sheen = (list, x) => `<path transform="translate(${x} 0)" d="${Object.values(list).map(both).join(' ')}" fill="url(#bsheen)"/>`;
     const fib = (d, x) => `<path transform="translate(${x} 0)" d="${d} ${this.mirror(d)}" fill="none" stroke="rgba(0,0,0,.3)" stroke-width=".9" stroke-linecap="round"/>`;
     return `<svg class="bodysvg ${opts.mini ? 'mini' : ''}" viewBox="0 0 420 ${opts.mini ? 412 : 420}" role="img" aria-label="Körperkarte">

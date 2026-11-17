@@ -166,5 +166,4 @@ Forms.authNewPw = async v => {
 
 App.start();
 FX.init();
-Rig.start();
 Push.init();
